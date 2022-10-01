@@ -1,0 +1,316 @@
+---
+title: StatR 501 Homework 7 Solutions
+author: John Best
+---
+
+# 1. Point estimates and confidence intervals:
+
+## (a)
+
+Do Exercise 2 from the lab: i.e. Write a function that estimates a point
+estimate and confidence interval at a given confidence level from a vector `X`
+with known standard deviation.
+
+---
+
+```{r}
+get_ci <- function(x, sigma, conf_level) {
+  n <- length(x)
+  est <- mean(x)
+  p <- (1 - conf_level) / 2
+  ## Use `lower.tail = FALSE` to get the positive quantile
+  conf_width <- sigma / sqrt(n) * qnorm(p, lower.tail = FALSE)
+  ci <- est + c(-1, 1) * conf_width
+  list(est = est, ci = ci)
+}
+```
+
+## (b)
+
+Use this function to obtain a point estimate and 95% and 50% confidence
+intervals of three random samples from `W` of size 3, 10, and 30 respectively
+(i.e. `W.5 <- sample(W,5)`, `W.10 <- sample(W,10)`, and `W.30 <- sample(W,30)`).
+
+---
+
+```{r}
+## Good to use `stringsAsFactors = FALSE` for `read.csv`, otherwise and string
+## columns are coerced to factors, which isn't always what you want (you can
+## convert columns to factors manually once the data are read into R).
+earthquakes <- read.csv("earthquakes_20151029.csv",
+                        stringsAsFactors = FALSE)
+eq_datetime <- as.POSIXlt(earthquakes$time, format = "%Y-%m-%dT%H:%M:%S")
+wait <- -as.numeric(difftime(eq_datetime[-1], eq_datetime[-length(eq_datetime)],
+                             units = "mins"))
+```
+
+```{r}
+## Population standard deviation
+sigma <- 35
+## Number of samples
+n <- c(3, 10, 30)
+## Confidence levels
+conf_level <- c(0.5, 0.95)
+## Get all combinations of `n` and `conf_levels`
+combos <- expand.grid(n = n, conf_level = conf_level)
+## Note that `mapply` uses slightly different syntax than the other `*apply`
+## functions; the function is the first argument.
+ci <- mapply(function(n, conf_level) {
+  w <- sample(wait, n)
+  out <- get_ci(w, sigma, conf_level)
+  write("--------------------", stdout())
+  write(paste0(n, " samples at ", 100 * conf_level, "% confidence level"),
+        stdout())
+  write(paste0("Estimate: ", out$est), stdout())
+  write(paste0("Confidence interval: (", out$ci[1], ", ", out$ci[2], ")"),
+        stdout())
+  out
+}, n = combos$n, conf_level = combos$conf_level,
+SIMPLIFY = FALSE)
+```
+
+
+## (c)
+
+Test the validity of your confidence level by repeating this procedure 10,000
+times, and count the proportion of times the 95% and 50% confidence intervals
+span the true mean. Comment on these results, with respect to the assumptions
+behind our construction of the confidence interval.
+
+---
+
+```{r}
+## Write a function to get the confidence interval, then test whether it covers
+## the true mean. Using a default sample size of 30.
+inout_ci <- function(conf_level, mu, sigma, x, n = 30) {
+  w <- sample(x, n)
+  ci <- get_ci(w, sigma, conf_level)
+  ## Return TRUE if true mean falls within confidence interval
+  min(ci$ci) < mu && mu < max(ci$ci)
+}
+## Now that the above function is defined, it is easy to use `replicate` to get
+## 10,000 samples and summarize them.
+ci50 <- replicate(10000, inout_ci(0.5, mu = 35, sigma = 35, x = wait))
+ci95 <- replicate(10000, inout_ci(0.95, mu = 35, sigma = 35, x = wait))
+```
+
+The coverage of the 50% confidence intervals was
+
+```{r}
+mean(ci50)
+```
+
+The coverage of the 95% confidence interval was
+
+```{r}
+mean(ci95)
+```
+
+These are very close to the nominal coverage. As we saw last week, a normal
+distribution closely approximates the sampling distribution with 30 waiting
+times.
+
+# 2. Hypothesis Tests
+
+In a previous homework, we tested the hypothesis that the seismic activity of
+the world is increasing in anticipation of the apocalypse. We based this on an
+observation that the mean waiting time between 10 consecutive earthquakes was
+about 23.4 minutes, compared to a known mean and standard deviation of 35 and 35
+minutes respectively. Here, we decompose this hypothesis test into its
+constituent parts:
+
+## (a)
+
+State the null and alternative hypotheses, in words and symbolically.
+
+---
+
+We are testing the null hypothesis that the mean wait time is greater than or
+equal to 35 minutes, $H_0: \mu \ge 35$, and the alternative hypothesis that the
+mean wait time is less than 35 minutes, $H_A: \mu < 35$.
+
+## (b)
+
+Last week we tested the sample mean $\bar{X}$ directly. This time, we would like
+to perform the test on the $Z$ statistic:
+
+$$Z = \frac{\bar{X} - \mu}{\sigma\sqrt{n}}$$
+
+Compute this statistic.
+
+---
+
+In this case we have $\bar{X} = 23.4$ minutes from 10 observations. So the $Z$
+statistic is
+
+```{r}
+Z <- (23.4 - 35) / (35 / sqrt(10))
+```
+
+$$Z = \frac{23.4 - 35}{35 / \sqrt{10}} = `r round(Z, 2)`$$
+
+## (c)
+
+Name the approximate distribution of this statistic under the null hypothesis.
+
+---
+
+Because we are computing a mean as our estimate, we assume that the central
+limit theorem holds and the sampling distribution of $\bar{X}$ is Normal. After
+subtracting the mean under the null hypothesis and scaling by the known standard
+deviation,
+
+$$Z \sim \operatorname{Normal}(0, 1).$$
+
+This makes it easy to calculate $p$-values or look them up in a reference book.
+
+
+## (d)
+
+Express the $p$-value of this test symbolically, and compute it. At a $\alpha =
+5\%$ significance level, do you reject the null hypothesis?
+
+---
+
+For observed $Z$ statistics $Z$,
+
+$$p = \int_{-\infty}^Z
+      \frac{1}{\sqrt{2\pi}}
+      \exp\left(-\frac{Z}{\sqrt{2}}\right)
+      \textrm{d}Z$$
+
+Graphically, the $p$-value is the shaded area:
+
+```{r}
+z <- seq(-4, 4, length.out = 1025)
+dn <- dnorm(z)
+plot(z, dn, type = 'l',
+     xlab = expression(Z), xlim = c(-4, 4), xaxs = "i",
+     ylab = "Density", ylim = c(0, 0.41), yaxs = "i")
+z2 <- seq(-4, Z, length.out = 513)
+z3 <- c(z2, Z, -4)
+dn2 <- c(dnorm(z2), 0, 0)
+polygon(z3, dn2, col = "red")
+```
+
+In this case we can use the `pnorm` function in R to calculate the value.
+
+```{r}
+pnorm(Z)
+```
+
+The `pnorm` function defaults to a mean of 0, standard deviation of 1, and
+returns a lower tail probability, which is what we want here.
+
+Because $p > 0.05$, we fail to reject the null hypothesis and cannot conclude
+that the mean waiting time is less than 35 minutes.
+
+# Bonus problem on $t$-tests
+
+## (a)
+
+You can generate a sample of size 10 with mean 15 from an exponential
+distribution using, e.g., `W.obs <- rexp(10,rate=1/15)`[^1]. Perform a $t$-test
+of `W.obs` for the null hypothesis that the mean is 35 and report the result.
+
+[^1]: Note: As a bonus-bonus problem, think of a way to produce an exponentially distributed sample whose mean is coerced to exactly 15
+
+---
+
+```{r}
+## To get a vector with mean exactly 15, first generate samples from exponential
+## distribution with mean 1, then correct to exactly 15
+w_tmp <- rexp(10)
+w_obs <- w_tmp / mean(w_tmp) * 15
+```
+
+Because R was built by and for statisticians, there is a handy `t.test` function built in.
+
+```{r}
+t.test(w_obs, alternative = "less", mu = 35)
+```
+
+To get a better understanding of what's happening behind the scenes, it's worth
+doing by hand a few times (spoiler alert: it's the same steps as the $Z$-test,
+but you use the sample standard deviation instead of the known population
+standard deviation).
+
+First state your hypotheses. The null hypothesis is that the mean waiting time
+is greater than or equal to 35 minutes, $H_0: \mu \ge 35$. the alternative
+hypothesis is that the mean waiting time is less than 35 minutes, $\mu < 35$.
+
+Next calculate the sample mean and standard deviation. Then use these to
+calculate the $t$ statistic:
+
+$$t = \frac{\bar{x} - \mu}{s / \sqrt{n}}$$
+
+```{r}
+x_bar <- mean(w_obs)
+s <- sd(w_obs)
+t_stat <- (x_bar - 35) / (s / sqrt(length(w_obs)))
+```
+
+Because we are also estimating the standard deviation here, we need to account
+for the additional uncertatinty. The Student's $t$ distribution is sort of a
+combination of Normal distributions with different variances, representing our
+uncertainty in the standard deviation. It has fatter tails (excess kurtosis), so
+it takes a more extreme $t$ statistic to get the same $p$-value as a $Z$
+statistic. As the degrees of freedom increase, the $t$ distribution converges to
+a Normal distribution.
+
+```{r}
+pt(t_stat, df = length(w_obs) - 1)
+```
+
+Either way, $p < 0.05$ so we can reject the null hypothesis and conclude that
+the mean waiting time is less than 35 minutes (and the end is nigh).
+
+# (b)
+
+Perform a `t.test` of the following observed data against the null hypothesis
+that $\mu_0 = 35$ minutes:
+
+```{r}
+W.obs <- c(0.9, 4.2, 0.1, 1.8, 0.9, 7.3, 0.4, 6.5, 1.8, 123)
+```
+
+Compare this $p$-value to the $p$-value you calculate using a $Z$-test (for the
+$Z$-test, assume a known standard deviation of 35). Explain why it is larger,
+smaller, or equal.
+
+---
+
+Our hypotheses remain the same as above. We can perform the $t$ test using the
+`t.test` function.
+
+```{r}
+(t_test <- t.test(W.obs, alternative = "less", mu = 35, conf.level = 0.95))
+```
+
+At a 5% confidence level, we cannot reject the null hypothesis under the $t$
+test.
+
+The $Z$ statistic is
+
+```{r}
+(Z_stat <- (mean(W.obs) - 35) / (35 / sqrt(length(W.obs))))
+```
+
+Giving a $p$-value of 
+
+```{r}
+(Z_pval <- pnorm(Z_stat))
+```
+
+At a 5% confidence level, we reject the null hypothesis under the $Z$ test.
+
+The difference between these two tests is due to the fact that the sample
+standard deviation is slightly larger than 35, decreasing the test statistic
+from $Z = `r round(Z_stat, 2)`$ to $t = `r round(t_test$statistic, 2)`$. The
+major difference however is in the fatter tails of a $t$ distribution with 9
+degrees of freedom also contributes to a larger $p$ value.
+
+This is unsurprising because the knowledge that the standard deviation is
+exactly 35 is important. Intuitively, it reduces our overall uncertainty so less
+information is required for us to conclude that we can reject the null
+hypothesis.

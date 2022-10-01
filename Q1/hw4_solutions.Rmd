@@ -1,0 +1,376 @@
+---
+title: StatR 501 Homework 4 Solutions
+author: John Best
+output:
+  pdf_document:
+      latex_engine: xelatex
+---
+
+# 2. Random variables I
+
+## a.
+
+Simulate 1000 numbers from the standard uniform distribution: $X \sim
+\operatorname{Uniform}(0, 1)$ and report the sample standard deviation ($s_x$)
+of these numbers.
+
+```{r}
+x <- runif(1000, 0, 1)
+sd(x)
+```
+
+## b.
+
+Write a function that returns $s_x$ of `n` draws from a
+$\operatorname{Uniform}(0, b)$ distribution, where b is the upper limit.
+
+```{r}
+runif_0b <- function(n, b) {
+  runif(n, 0, b)
+}
+```
+
+## c.
+
+Obtain the values $s_x$ against values of $b$ ranging from 1 to 10 (using any
+large value of `n`). Is there a consistent pattern? Can you propose a model that
+predicts $s_x$ with upper limit $b$?
+
+```{r}
+n <- 10000
+b_vals <- 1:10
+b_sds <- rep(NA, 10)
+# Conveniently `b` serves as both a value and an index here.
+for (b in b_vals) {
+  b_sds[b] <- sd(runif_0b(n, b))
+}
+plot(b_vals, b_sds)
+```
+
+There appears to be a linear relationship between the upper bound of the uniform
+distribution and its standard deviation. We can use the `lm` function to
+esitmate this relationship. Because we know that the standard deviation of a
+$\operatorname{Uniform}(0, 0)$ distribution must be zero, we can set the
+intercept to zero.
+
+```{r}
+b_mod <- lm(b_sds ~ b_vals - 1)
+(b_coef <- coef(b_mod)[1])
+```
+
+This shows that for every unit that $b$ increases, the standard deviation
+increases by `r b_coef`. This is consistent with the theoretical result that the
+standard deviation of this distribution is $b / 2\sqrt{3}$, which gives a linear
+relationship with slope `r 1 / sqrt(12)`.
+
+# 3. Random variables II
+
+## a.
+
+Generate two vectors, `X1` and `X2`, each of which represents 10,000 draws from
+the $\operatorname{Uniform}(0, 1)$ distribution. Obtain the pairwise sum of
+these vectors (i.e. `Y2 = X1+X2`) and plot the density histogram of Y.
+
+```{r}
+X1 <- runif(10000, 0, 1)
+X2 <- runif(10000, 0, 1)
+Y2 <- X1 + X2
+
+hist(Y2, probability = TRUE)
+```
+
+## b.
+
+Guess what the probability distribution function (p.d.f.) of `Y2` might be (i.e.,
+describe it mathematically with a one-to-one function), and illustrate it with a
+line over the histogram.
+
+The values must be between 0 and 2, with central values more likely thant values
+closer to these limits. This appears to be a symmetric triangular distribution,
+so that
+
+$$p(y) = \begin{cases}
+    0 & y < 0\\
+    y & 0 \le y < 1\\
+    2 - y & 1 \le y < 2\\
+    0 & y \ge 2
+\end{cases}$$
+
+```{r}
+hist(Y2, probability = TRUE, xaxs = "i", yaxs = "i", ylim = c(0, 1))
+lines(c(-10, 0, 1, 2, 10), c(0, 0, 1, 0, 0))
+```
+
+## c.
+
+Similarly obtain `Y5 = X1 + X2 + ... + X5` and `Y10` (using a loop). Plot on a
+single 4×2 figure the respective `histograms` and `qqnorm` plots of `X1`, `Y2`, `Y5`, and `Y10`. What do you observe?
+
+```{r}
+Y5 <- runif(10000, 0, 1)
+for (i in 2:5) {
+  Y5 <- Y5 + runif(10000, 0, 1)
+}
+
+Y10 <- runif(10000, 0, 1)
+for (i in 2:10) {
+  Y10 <- Y10 + runif(10000, 0, 1)
+}
+```
+
+```{r}
+par(mfrow = c(1, 2))
+for (vbl in list(X1, Y2, Y5, Y10)) {
+  hist(vbl, probability = TRUE)
+  qqnorm(vbl)
+  qqline(vbl)
+}
+```
+
+The distributions get closer to a normal distribution the more that are added
+together. This corresponds to Central Limit Theorem, which we will learn about
+later.
+
+# 4. De Méré's wager I
+ 
+## a.
+ 
+Write a function (`DeMereA(n)`) that simulates this game, i.e. takes a certain
+number (`n`) of rolls of a die and returns a `TRUE`if there is at least one six,
+and a `FALSE` if there isn’t.
+
+```{r}
+DeMereA <- function(n) {
+  roll <- sample(1:6, n, replace = TRUE)
+  any(roll == 6)
+}
+```
+
+## b.
+
+Simulate 1000 of these games and compute the number of times he wins.
+
+```{r}
+demere_a_outcomes <- replicate(1000, DeMereA(4))
+sum(demere_a_outcomes)
+```
+
+## c.
+
+De Méré’s reasoning was faulty, but he still won a lot of money playing this
+(frankly, kind of stupid) game. What is the actual probability of getting at
+least one six in four rolls? Use `dbinom`.
+
+A win occurs if one or more of the die rolls a six, so we need to sum the
+probabilities of these. Alternatively, we can calculate the probability of *not*
+rolling zero sixes.
+
+```{r}
+sum(dbinom(1:4, 4, 1/6))
+1 - dbinom(0, 4, 1/6)
+```
+
+These match the simulated probability of winning we found above.
+
+```{r}
+mean(demere_a_outcomes)
+```
+
+# 5. De Méré’s wager II
+
+## a.
+
+Write an analogous function (DeMereB(n)) that simulates the 24 roll game with
+double dice.
+
+There are many ways to approach this question. The method uses logical
+operations to check for pairs of sixes.
+
+```{r}
+DeMereB <- function(n) {
+  # Roll each dice `n` times
+  d1 <- sample(1:6, n, replace = TRUE)
+  d2 <- sample(1:6, n, replace = TRUE)
+
+  # Check which rolls are 6 (get two vectors of `TRUE` or `FALSE`)
+  is_six_1 <- d1 == 6
+  is_six_2 <- d2 == 6
+
+  # Use the `&` (and) operator to check if there are any pairs. This compares
+  # the elements of each vector so that `TRUE & TRUE == TRUE`, otherwise
+  # `FALSE`.
+  is_pair_six <- is_six_1 & is_six_2
+
+  # If any element of `is_six_pair` is `TRUE`, then you win, so return `TRUE`.
+  any(is_pair_six)
+}
+```
+
+## b.
+
+Simulate 1000 of these games and compute the number of victories.
+
+```{r}
+demere_b_outcomes <- replicate(1000, DeMereB(24))
+sum(demere_b_outcomes)
+```
+
+## c.
+
+Again, De Méré’s reasoning was faulty. Compute the actual probaiblity of getting
+at least one double six in twenty four rolls. Use `dbinom`.
+
+We know that the probability of rolling a pair of sixes is $1/6 \times 1/6 = 1/36$. Again, we can either sum the probabilities of winning or find the probability of not losing.
+
+```{r}
+sum(dbinom(1:24, 24, 1/36))
+1 - dbinom(0, 24, 1/36)
+```
+
+# Card playing
+
+## a.
+
+How many possible hands of five unique cards can be drawn from a deck of cards?
+(recall that when you draw cards, you are not replacing them in the deck.)
+
+Because we don't care about the order of the hand, we are looking for the number
+of combinations of 5 cards drawn from a deck of 52. The `choose` function can
+calculate this. It can also be calculated using the `factorial` function.
+
+```{r}
+choose(52, 5)
+```
+
+## b.
+
+In poker, a *flush* is defined as five cards of the same suit, regardless of the
+value of the card. Write a function called `IsFlush` that draws five cards from
+a deck and determines (`TRUE`/`FALSE`) whether or not it is a flush. (Hint: you
+probably don't want to use the completely defined deck above, but create a
+simpler vector).
+
+We only need the suit of the card, so a vector of the integers 1 through 4, each
+repeated 13 times is a simple representation of the deck.
+
+```{r}
+IsFlush <- function() {
+  deck <- rep(1:4, each = 13)
+  hand <- sample(deck, 5, replace = FALSE)
+  all(hand[1] == hand[2:5])
+}
+```
+
+## c.
+
+Simulate this process 10,000 times and count how many times you draw a flush.
+What is the approximate probability of a flush based on this experiment? Note
+that there are two ways to do this: with a loop, or by creating a matrix of
+decks and using `apply`.
+
+I've chosen a third way: using `replicate` will run the function a specified
+number of times, returning a vector of `TRUE` or `FALSE` that can then be
+analyzed. Note that `replicate` is a wrapper around `sapply`, which is closely
+related to `apply`.
+
+```{r}
+flush_outcomes <- replicate(10000, IsFlush())
+sum(flush_outcomes)
+```
+## d.
+
+A *straight* is a sequence of five cards in numerical order (here we consider
+Ace as high-only or low-only; the probabilities won't change). Repeat parts b
+and c.
+
+```{r}
+IsStraight <- function() {
+  deck <- rep(1:13, 4)
+  hand <- sample(deck, 5, replace = FALSE)
+  # If all the differences between consecutive sorted cards is one, the hand is
+  # a straight. If it's difficult to see what's going on with these nested
+  # function, try rewriting using a couple of intermediate variables.
+  all(diff(sort(hand)) == 1)
+}
+```
+
+```{r}
+str_outcomes <- replicate(10000, IsStraight())
+sum(str_outcomes)
+```
+
+## e.
+
+Based on thse results, which is the more likely hand to be dealt in a game of
+poker?
+
+A *straight*is more likely to be dealt than a *flush*, with approximate
+probabilities `r mean(str_outcomes)` and `r mean(flush_outcomes)` respectively.
+
+## Optional
+
+There are `r choose(13, 5)` ways to choose five cards from a suit of 13 cards.
+With four suits, there are `r 4 * choose(13, 5)` flush hands. As there are
+`r choose(52, 5)` possible hands, the probability of drawing a flush is
+`r 4 * choose(13, 5) / choose(52, 5)`.
+
+To form a straight consider that the first card chosen is the lowest. The lowest
+card drawn can be any suit, with rank between 2 and 10 (considering Ace high
+here), for $9 \times 4 = 36$ possibilities. Each subsequent card must have the
+correct rank, but can be any suit, so there are 4 possibilities. Thus the number
+of 5-card straights is $36 \times 4 \times 4 \times 4 \times 4 = 9,216$ and a
+probability of drawing a straight of `r 36 * 4 ^ 4 / choose(52, 5)`.
+
+# 7. Airplane functioning
+
+## a.
+
+Use the `rbinom` function to simulate a flight on Epsilon airline by creating a
+vector of 100 elements which succeed or fail with the appropriate probability.
+
+Here we consider that each of the 100 parts has probability 0.001 of failing,
+and we want to simulate the failure of each part. This means that we are
+simulating 100 replicates of one event occuring with probability 0.001.
+
+```{r}
+airparts <- rbinom(100, 1, 0.001)
+```
+
+## b.
+
+Use the `rbinom` function in a slightly different way to produce a vector of
+length 1,000,000 where every element is the number of components that fail each
+flight. Use this vector to produce an estimate of the probability of failure for
+the airplane.
+
+Here we care about the number of failures out of the 100 parts over 1,000,000
+replicates. So we simulate 1,000,00 replicates of 100 events occuring with
+probability 0.001.
+
+```{r}
+part_failures <- rbinom(1000000, 100, 0.001)
+mean(part_failures > 0)
+```
+
+## c.
+
+Based on this result, would you take a flight on Epsilon airlines?
+
+I would not.
+
+## d.
+
+Using `dbinom`, calculate the exact probability that the flight will *not* be
+successful. what important assumptions are you making in this calculation (and
+in the simulations above)?
+
+Here we want the probability that one or more part fails. Again we can sum the
+outcomes directly or find the probability of the opposite outcome not occuring.
+
+```{r}
+sum(dbinom(1:100, 100, 0.001))
+1 - dbinom(0, 100, 0.001)
+```
+
+One of the major assumptions we are using here is that each part fails
+independently of any other part.

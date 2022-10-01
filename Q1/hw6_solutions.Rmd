@@ -1,0 +1,428 @@
+---
+title: StatR 501 Homework 6 Solutions
+author: John Best, Scott Rinnan, and Elie Gurarie
+---
+
+# 1. Central limit theorem
+
+## (a)
+
+Create a version of the `CLT(FUN, n, k)` function in the lab, which illustrates
+the central limit theorem by sampling $k$ random numbers for any specified
+distribution (with any parameter values) $n$ times and summing them. Have it
+illustrate the distribution of the $n$ sums and a `qqnorm` plot and line, but add
+the feature described in Exercise 2 where you also draw a normal density curve
+superimposed on a histogram.
+
+---
+
+A general approach to writing this function uses the `...` argument to allow
+passing the correct number of arguments for each distribution function (e.g.
+`rexp` takes one rate parameter while `rgamma` takes a shape and a rate
+parameter).
+
+```{r}
+CLT <- function(rfun, n, k = 1000, ...){
+  y <- rep(0, k)
+  for(i in 1:n)
+    y <- y + rfun(k, ...)
+  par(mfrow = c(1, 2))
+  hist(y, col = "grey", bor = "darkgrey", freq = FALSE)
+  curve(dnorm(x, mean(y), sd(y)), col = 2, lwd = 2, add = TRUE, xpd = FALSE)
+  qqnorm(y)
+  qqline(y, col=2)
+}
+```
+
+Testing it with an $\operatorname{Exponential}(1)$ distribution,
+
+```{r}
+CLT(rexp, n = 2, k = 1000, rate = 1)
+```
+
+```{r}
+CLT(rexp, n = 100, k = 1000, rate = 1)
+```
+
+### Optional sidebar
+
+However, using the sample mean and variance is, in fact, a bit of a hack. To
+truly represent the central limit theorem, the function should use the
+theoretical mean and variance of the distribution you're interested in. This is
+tricky to do in a generic way because the `FUN` argument is not the name of the
+p.d.f. but a random generator. One way around this would be to pass *both* the
+random number generating function and the density function.
+
+```{r}
+CLT_2fun <- function(rfun, dfun, n, k = 1000, ..., support = c(-Inf, Inf)){
+  ## Calculate the theoretical mean
+  mu <- integrate(function(x) x * dfun(x, ...),
+                  min(support), max(support))$value
+  ## Calculate the expected value of x^2, which we use to find the variance and
+  ## standard deviation
+  ex2 <- integrate(function(x) x^2 * dfun(x, ...),
+                   min(support), max(support))$value
+  ## Use this to calculate the theoretical standard deviation
+  sigma <- sqrt(ex2 - mu^2)
+  y <- rep(0, k)
+  for(i in 1:n)
+    y <- y + rfun(k, ...)
+  par(mfrow = c(1, 2))
+  hist(y, col = "grey", bor = "darkgrey", freq = FALSE)
+  curve(dnorm(x, mu * n, sigma * sqrt(n)), n = 1025,
+        col = 2, lwd = 2, add = TRUE, xpd = FALSE)
+  qqnorm(y)
+  qqline(y, col = 2)
+}
+```
+
+Note that we also add a `support` argument to account for functions whose
+densities are ill-behaved outside the support. This defaults to $-\infty < x <
+\infty$, but should be changed to `c(0, Inf)` for the
+$\operatorname{Exponential}$ distribution or `c(0, 1)` for the
+$\operatorname{Beta}$ distribution.
+
+```{r}
+CLT_2fun(rgamma, dgamma, n = 10, k = 1000, shape = 2, rate = 2,
+         support = c(0, Inf))
+```
+
+The downside of this approach is that we need to trust that the user passes a
+matching pair of random number generating and density functions. To fix this we
+use some of R's *metaprogramming* tools. This means that the function writes
+some of its code on the fly. The first function we use is `match.call`. When the
+return value is converted to a `list` we can extract the name of the function
+passed. We can then replace the "r" with "d" and use the `get` function to
+retrieve the density function corresponding to the random number generator
+function that was passed. This change is added as the first line of the
+function.
+
+```{r}
+CLT_rfun <- function(rfun, n, k = 1000, ..., support = c(-Inf, Inf)){
+  ## Retrieve the function call and extract the name of the random number
+  ## generating function
+  dfun_name <- as.character(as.list(match.call())$rfun)
+  ## Substitute a "d" for the first letter (likely "r")
+  substr(dfun_name, 1, 1) <- "d"
+  ## Retrieve the function using `get` and assign it to `dfun`
+  dfun <- get(dfun_name)
+  ## Calculate the theoretical mean
+  mu <- integrate(function(x) x * dfun(x, ...),
+                  min(support), max(support))$value
+  ## Calculate the expected value of x^2, which we use to find the variance and
+  ## standard deviation
+  ex2 <- integrate(function(x) x^2 * dfun(x, ...),
+                   min(support), max(support))$value
+  ## Use this to calculate the theoretical standard deviation
+  sigma <- sqrt(ex2 - mu^2)
+  y <- rep(0, k)
+  for(i in 1:n)
+    y <- y + rfun(k, ...)
+  par(mfrow = c(1, 2))
+  hist(y, col = "grey", bor = "darkgrey", freq = FALSE)
+  curve(dnorm(x, mu * n, sigma * sqrt(n)), n = 1025,
+        col = 2, lwd = 2, add = TRUE, xpd = FALSE)
+  qqnorm(y)
+  qqline(y, col = 2)
+}
+```
+
+```{r}
+CLT_rfun(rgamma, n = 20, k = 1000, shape = 0.5, rate = 2, support = c(0, Inf))
+```
+
+*Metaprogramming* is not something you're likely to need any time soon, but
+demonstrates some of the power available to R users.
+
+## (b)
+
+ Run this function on random samples from the beta-distributed random variable
+(see http://en.wikipedia.org/wiki/Beta_distribution), which is a distribution
+that takes two parameters ($\alpha$ and $\beta$, called `shape1` and `shape2` in
+the `rbeta` function). Illustrate the central limit theorem for two random
+variables: $X \sim \operatorname{Beta}(\alpha = 0.5, \beta = 0.5)$ and $Y \sim
+\operatorname{Beta}(\alpha = 0.5, \beta = 0.1)$, summing each of these $n = 1, 2,
+10$, and $20$ times. Comment on the number of times you need to sum these random
+variables before the central limit theorem "kicks in", i.e. when the
+distribution begins to look normal.
+
+---
+
+Using the final version defined above, we can loop over the values of `n` to
+produce our plots.
+
+```{r}
+for (n in c(1, 2, 10, 20)) {
+  CLT_rfun(rbeta, n = n, k = 1000, shape1 = 0.5, shape2 = 0.5, support = c(0, 1))
+}
+```
+
+The $\operatorname{Beta}(0.5, 0.5)$ distribution is symmetric and appears to
+approach the normal distribution after summing 10 random values.
+
+```{r}
+for (n in c(1, 2, 10, 20)) {
+  CLT_rfun(rbeta, n = n, k = 1000, shape1 = 0.5, shape2 = 0.1, support = c(0, 1))
+}
+```
+
+The $\operatorname{Beta}(0.5, 0.1**$ distribution is so asymmetric that there is
+some asymmetry even after summing 20 random draws.
+
+---
+
+**NOTE:** The central limit theorem is useful, but it is not a free pass to
+assume everything is normally distributed. As show above, it is not always
+obvious how many samples are required for a reasonable approximation. The
+theorem also requires that the distribution being sampled has a finite mean and
+variance. This means that the central limit theorem does not apply to
+distributions like the $\operatorname{Cauchy}$.
+
+---
+
+# 2. Sampling distribution
+
+Carefully go through Part II of this week's lab. In this section, we sample a
+random variable $X$ (in this case, waiting times between earthquakes) $n$ times
+and look at the resulting distribution of $X_n$ (where the subscript $n$
+represents the size of the sample).
+
+## (a)
+
+Tweak the `SampleMean` function to illustrate (again) the normal approximation
+to the histogram of the sampling distributions, and make 4 separate plots
+showing the sample distribution for $\bar{X}_5$ , $\bar{X}_{10}$, $\bar{X}_{30}$
+and $\bar{X}_{100}$. At what point do you think the normal approximation is
+valid for the earthquake waiting time distribution?
+
+---
+
+Load the earthquake data and obtain waiting times:
+
+```{r}
+earthquakes <- read.csv("earthquakes_20151029.csv")
+DateTime <- as.POSIXlt(earthquakes$time, format = "%Y-%m-%dT%H:%M:%S")
+X <- -as.numeric(difftime(DateTime[-1], DateTime[-length(DateTime)],
+                          units = "mins"))
+```
+
+The tweaked `SampleMean` function is
+
+```{r}
+SampleMean <- function(X, n = 30, k = 10000, ...){
+  X.bar <- rep(NA, k)
+  for(i in 1:k)
+    X.bar[i] <- mean(sample(X, n))
+  hist(X.bar, freq = FALSE, ...)
+  curve(dnorm(x, mean(X), sd(X) / sqrt(n)), n = 1025,
+        lwd = 2, col = 2, add = TRUE)
+}
+```
+
+```{r}
+par(mfrow=c(1,2))
+for (n in c(5, 10, 30, 100))
+  SampleMean(X, n = n, col = "grey", bor = "darkgrey", breaks = 30,
+             main = paste0("Xbar.", n), xlim = c(0,100))
+```
+
+The normal approximation is quite good for `n = 30`, though there is still some
+visible asymmetry. This is a testament to the extremely skewed nature of the
+earthquake waiting time distribution. By `n = 100`, the normal approximation is
+excellent.
+
+## (b) Bonus Problem
+
+Perform a loop using the `SampleMean` function that calculates the sample
+standard deviation of $X_n$ for values of $n$ ranging from 1 to 100, and plot
+the result (i.e., `n <- 1:100` on the x-axis, and `X.bar.sd` on the y-axis).
+
+---
+
+I simplified the function, so as not to plot all the histograms and return the
+sample standard deviation.
+
+```{r}
+SampleMean.SD <- function(X, n = 30, k = 10000, ...){
+  X.bar <- rep(NA, k)
+  for(i in 1:k)
+    X.bar[i] <- mean(sample(X, n))
+  sd(X.bar)
+}
+```
+
+I can do a loop like this:
+
+```{r}
+X.bar.sd <- rep(NA, 100)
+for(n in 1:100)
+  X.bar.sd[n] <- SampleMean.SD(X, n, k=100)
+```
+
+Or, in one step, using the `sapply` function:
+
+```{r}
+n <- 1:100
+X.bar.sd <- sapply(n, function(n) SampleMean.SD(X, n, 100))
+```
+
+And plot the output:
+
+```{r}
+plot(n, X.bar.sd)
+```
+
+Note that `k = 100` is plenty.
+
+## (c) Bonus Problem
+
+According to the central limit theorem, what is the theoretical prediction for
+this curve in terms of $\sigma_x$, the standard deviation of the entire
+population? Draw the theoretical prediction on this plot. Approximately how
+large of a sample of waiting times would you need to estimate the true mean
+waiting time ($\mu$) to within a standard deviation of 5 minutes?
+
+---
+
+According to the central limit theorem, the standard deviation of the sample
+mean is given by $\sigma_{\bar{x}} = \sigma_x / \sqrt{n}$. So we can add the
+theoretical line as:
+
+```{r}
+plot(n, X.bar.sd, col = "grey")
+curve(sd(X) / sqrt(x), add = TRUE, col = 2, lwd = 2)
+```
+
+Since $\sigma_x = `r sd(X)`$ (when I downloaded the earthquake data), solving
+for $n$ gives $n = \sigma^2_x / 5^2 = `r round(n_obs <- var(X) / 5^2, 2)`$,
+implying that we need at least $`r round(n_obs, 0)`$ observations to estimate
+the mean waiting time with a standard deviation of five minutes.
+
+# 3. Apocalyptic inference
+
+Carefully go through Part III of the lab. In the lab, we determine that if we
+observe 10 earthquakes in a row with a mean interval of 23.4 minutes, that it is
+a too early to think the world is ending because - under normal conditions -
+there is almost a 15% chance that we would observe a mean that small or smaller
+anyway.
+
+## (a)
+
+Determine the probability that we would observe 30 or 100 earthquakes with a
+mean interval of 23.4 minutes or lower under the assumption that the world is
+not ending. This probability is called the $p$-value of a hypothesis test (we'll
+get into that more next week).
+
+The theoretical sampling distributions are
+
+$$\bar{X}_{30} \sim
+  \operatorname{Normal}\left(\mu_x, \frac{\sigma^2_x}{30}\right),
+  \quad \bar{X}_{100} \sim
+  \operatorname{Normal}\left(\mu_x, \frac{\sigma^2_x}{100}\right)$$
+
+Which we can illustrate
+
+```{r}
+curve(dnorm(x, mean = mean(X), sd = sd(X) / sqrt(30)), n = 1025,
+      xlim = c(10, 60), ylim = c(0, 0.115), ann = FALSE)
+curve(dnorm(x, mean = mean(X), sd = sd(X) / sqrt(100)), n = 1025,
+      col = 2, add = TRUE)
+legend("topright", lty = 1, col = 1:2, legend = c(30, 100),
+       title = "Sample Size", bty = "l")
+```
+
+The $p$-values are given by $\Pr(\bar{X}_{30} < \bar{x}_{obs})$ and
+$\Pr(\bar{X}_{100} < \bar{x}_{obs})$ respectively, where $\bar{x}_{obs}$ is the
+observed mean of 23.4 minutes. These probabilities can be calculated using the
+`pnorm` function.
+
+```{r}
+pnorm(23.4, mean(X), sd(X) / sqrt(30))
+```
+
+```{r}
+pnorm(23.4, mean(X), sd(X) / sqrt(100))
+```
+
+Both of these $p$-values are significant at the $\alpha = 0.05$ level.
+
+## (b)
+
+A typical "significance level" for rejecting a null hypothesis (e.g., that the
+world is NOT ending) is a $p$-value of 0.05. After how many earthquakes coming
+in at an average rate of one every 23.4 minutes should we start panicking? You
+can solve this with simulation or math (or both!)
+
+The most straightforward way to do this is brute force, e.g. with a while loop
+through different sample sizes:
+
+```{r}
+n <- 0
+p <- 1
+while(p > 0.05){
+  n <- n+1
+  p <- pnorm(23.4, mean(X), sd(X)/sqrt(n))
+}
+n
+```
+
+Quite a few people wondered in the homework how one would solve for this p-value
+more optimally (i.e. without crudely looping). One option is to use the
+`uniroot` function, which finds values of `x` for which a given function `f` is
+equal to zero. Thus:
+
+```{r}
+f <- function(x) 2 - x^2
+curve(f, lwd = 2, xlim = c(-2, 3))
+abline(h = 0, col = "grey")
+uniroot(f, interval = c(0, 3))
+curve(f, lwd = 2, xlim = c(-2, 3))
+abline(h = 0, col = "grey")
+points(uniroot(f, interval = c(0, 3))$root, 0, pch = 19, col = "blue")
+```
+
+This solves for he point where the curve crosses $-$, which happens to be
+$\pm\sqrt{2}$.
+
+Note that this function only works if the function evaluated at one limit is
+greater than zero and the function evaluated at the other limit is less than
+zero. Thus,
+
+```{r eval=FALSE}
+uniroot(f, interval = c(-2, 2))
+```
+
+doesn't work. But
+
+```{r}
+uniroot(f, interval = c(0, 2))
+```
+
+does.
+
+Anyways, to adapt this function to our problem, we need to define a function
+that we want to find the zero of:
+
+```{r}
+myf <- function(n) pnorm(23.4, mean(X), sd(X) / sqrt(n)) - 0.05
+uniroot(myf, c(0, 100))
+```
+
+This rapidly solves for a nearly exact answer. In many was this is overkill for
+this problem, but root-finding using `uniroot` is a useful tool to have in the
+back of your mind.
+
+Of course, this is trivial to solve mathematically as well. We are solving for
+the $n$ for which the $p$-value is equal to 5%. So
+
+$$z_{95\%} = \frac{\bar{X} - \mu_0}{\sigma / \sqrt{n}}.$$
+
+Rearranged:
+
+$$n = \left(\frac{z_{95\%} - \sigma}{\bar{X} - \mu_0}\right)^2.$$
+
+This value can be calculated in R:
+
+```{r}
+(qnorm(0.95) * sd(X) / (23.4 - mean(X)))^2
+```
