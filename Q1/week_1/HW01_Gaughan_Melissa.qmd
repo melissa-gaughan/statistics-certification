@@ -2,28 +2,144 @@
 title: "HW01_Gaughan_Melissa"
 format: html
 editor: visual
+execute:
+  eval: true
+  output: true
 ---
 
-## Quarto
+## 3. Data of interest
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+I am interested in exploring the hiring and retention of bus drivers at King County Metro. We are currently unable to provide the level of service we would like because we do not have drivers to operate the service.
 
-## Running Code
+### Variables
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+I don't work in HR, so I don't have direct access to this data, but I imagine that some of the variables that would impact hiring and retention would be:
+
+-   Pay and benefits (quantitative)
+
+-   Length of time in hiring process (i.e. HR backlog) (quantitative)
+
+-   Ability to pass CDL license test (categorical)
+
+-   Size of training class (quantitative)
+
+-   Availability of bus driver trainers (categorical)
+
+-   Timing of training class (quantitative)
+
+-   Policies around drivers having to start with part time work (categorical)
+
+-   Light rail expansion (only qualified bus drivers are eligible for light rail positions) (quantitative)
+
+### Relationships
+
+The explanatory variables are inter-related. For example, the size of the training class, the availability of trainers and the timing of the class likely have effects on the rate at which people pass the driving test. The length of time it takes to get people hired may also be related to the driving class timing and availability of trainers. I think the rest of the variables I've identified are independent of each other, but I am sure there are other factors at play that I have not considered.
+
+### IV/DV
+
+The obvious dependent variables are the rate of hiring of drivers and the rate of departures. The obvious explanatory variables are pay and benefits and the ability to pass the CDL test.
+
+## 4. Vectors
 
 ```{r}
-usethis::create_from_github(
-  "https://github.com/YOU/YOUR_REPO.git",
-  destdir = "~/path/to/where/you/want/the/local/repo/"
-)
+v1 <- seq(from = 2, to = 100, by = 2)
+v1
 ```
-
-You can add options to executable code like this
 
 ```{r}
-#| echo: false
-2 * 2
+v2 <- (1:50)*2
+v2
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+v3 <- cumsum(rep( 2, 50))
+v3
+```
+
+### 5. Basic Statistics
+
+```{r}
+x <- 1:100
+x
+```
+
+5.a
+
+```{r}
+sum_x <- sum(x)
+sum_x
+```
+
+5.b
+
+```{r}
+sum_x_squared <- sum_x^2
+sum_x_squared
+```
+
+5.c
+
+```{r}
+mean_x <- mean(x)
+mean_x
+```
+
+5.d
+
+```{r}
+variance <- sum((x - mean(x))^2)
+
+variance
+```
+
+5.e
+
+```{r}
+variance_2 <- sum(x^2)-length(x)*mean(x)^2
+variance_2
+```
+
+### 6. Grades
+
+```{r}
+Names <- c("Alana", "Bettie", "Consuela", "Dona", "Elaine", "Frances",
+"Gerri", "Helene", "Ichabod", "Jin", "Kenyatta", "Larry",
+"Mikhailo","Nick","Odin")
+Sex <- c(rep("F",8), rep("M",7))
+
+set.seed(100)
+Grades <- round(runif(15,50,100))
+
+gt90 <-Grades[Grades >90]
+
+a_students <- Names[Grades >90] 
+
+f_students <- Names[Grades <60] 
+
+Grades.F <- Names[Sex =="F"] 
+Grades.M <- Names[Sex =="M"] 
+
+# Use the sum() and length() functions to obtain average grades of the male and female students.
+# Which have higher grades?
+
+average_female_grades <- sum(Grades[Sex =="F"])/ length(Grades[Sex =="F"])
+
+average_male_grades <- sum(Grades[Sex =="M"])/ length(Grades[Sex =="F"])
+
+```
+
+In this class, female students have a higher average score by `r  average_female_grades- average_male_grades` points.
+
+### Basic R Coding
+
+**Q7.**
+
+**A**. You would need to use the list argument of the rm() function to pass it a list of named objects as a list. To clear the global environment, type rm(list=ls()).
+
+**B.** This is an example of vector recycling. Because the vector c(0,2) only has two elements and the second vector c(3 , 4, 5, 6) has 4, the first vector's elements are used multiple times to match the length of the second vector.
+
+**C.** A vector can only hold one data type (character, numeric etc) while a list can hold multiple types. A list can also be recursive ( a list of lists is a common pattern in R).
+
+**D.** The cut function and the class function. The class() function returns information about an object.
+
+**E.** The details section is most likely to have information about function outputs.\
