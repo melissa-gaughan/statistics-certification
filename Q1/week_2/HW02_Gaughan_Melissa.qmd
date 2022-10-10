@@ -1,0 +1,129 @@
+---
+title: "HW02_Gaughan_Melissa"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse, quietly = TRUE, warn.conflicts = F)
+```
+
+### Q2. Matrices
+
+```{r}
+student_grades <- matrix(data = c(89, 87, 84, 78, 95, 90, 92, 76, 75, 60, 71, 58, 82, 0, 88, 68, 90, 90, 96, 80), 
+                         nrow = 4, ncol= 5,dimnames = list(c("quiz1", "quiz2", "midterm", "final"), c("Alice", "Bruno", "Carl", "Dolores", "Ebenezer")) )
+
+student_grades
+```
+
+```{r}
+student_grades_by_row <- matrix(data = c(89, 95, 75, 82, 90, 87, 90, 60, 0, 90, 84, 92, 71, 88, 96, 78, 76, 58, 68, 80), byrow = TRUE,  nrow = 4, ncol= 5,dimnames = list(c("quiz1", "quiz2", "midterm", "final"), c("Alice", "Bruno", "Carl", "Dolores", "Ebenezer")))
+
+student_grades_by_row
+```
+
+```{r}
+
+
+student_grades_by_line_1 <- tibble(test = "quiz1",
+                                    Alice = 89, 
+                                    Bruno = 95, 
+                                    Carl = 75, 
+                                    Dolores = 82, 
+                                    Ebenezer = 90)
+  
+ 
+                                                                                             
+               
+student_grades_by_line_2 <-  tibble(test = "quiz2",
+                                    Alice = 87, 
+                                    Bruno = 90, 
+                                    Carl = 60, 
+                                    Dolores = 0, 
+                                    Ebenezer = 90)
+  
+  
+ 
+student_grades_by_line_3 <- tibble(test = "midterm",
+                                    Alice = 84, 
+                                    Bruno = 92, 
+                                    Carl = 71, 
+                                    Dolores = 88, 
+                                    Ebenezer = 96)
+  
+
+student_grades_by_line_4 <-  tibble(test = "final",
+                                    Alice = 78, 
+                                    Bruno = 76, 
+                                    Carl = 58, 
+                                    Dolores = 68, 
+                                    Ebenezer = 80)
+  
+  
+
+student_grades_by_line <- bind_rows(student_grades_by_line_1, student_grades_by_line_2, 
+ student_grades_by_line_3, student_grades_by_line_4                                   )
+
+student_grades_by_line
+
+```
+
+I am skipping 2.d because all my matrices and tibbles already have names added to the tables.
+
+#### 2.e Alice's scores on Quizes
+
+```{r}
+alice_scores <- student_grades_by_line %>% 
+  select( test, Alice) %>% 
+  filter(test %in% c("quiz1", "quiz2"))
+
+alice_scores
+```
+
+#### 2.f Class means
+
+I am choosing to do this in tidyverse because it is faster and cleaner than doing it in base R. I do not see a reason to do this in base R when I can do it in tidyverse.
+
+```{r}
+class_means <- student_grades_by_line %>% 
+   filter(test %in% c("quiz1", "quiz2")) %>% 
+  summarise(across(where(is.numeric), .fns = mean))
+
+class_means
+```
+
+#### 2.g colMeans
+
+The colMeans function would apply the mean function to all numeric columns in a matrix. This is the equivalent of the apply function in base R or the summarise(across()) pattern in tidyverse.
+
+```{r}
+student_survey <- read_csv(here::here("Q1", "week_2", "StudentSurvey.csv"), show_col_types = FALSE)
+
+unique(student_survey$Pingpong)
+
+male_female_pingpong <- student_survey %>% 
+  group_by(Pingpong, Sex) %>% 
+  drop_na() %>% 
+  summarise( count_students = n()) %>% 
+  pivot_wider(id_cols = Sex, names_from = Pingpong, 
+              values_from = count_students)
+  
+male_female_pingpong
+
+male_female_pingpong_matrix <- as.matrix(male_female_pingpong)
+
+male_female_pingpong_long <- student_survey %>% 
+  group_by(Pingpong, Sex) %>% 
+  drop_na() %>% 
+  summarise( count_students = n())
+
+
+pingpong_chart <-ggplot(male_female_pingpong_long,  aes(Pingpong, count_students))+
+  geom_bar( aes(fill= Sex), position = "dodge", stat = "identity")
+ 
+pingpong_chart                        
+
+```
+
+In the barplot function, the col() argument controls the number of colors assigned to the chart. The provided code is choosing colors and assigning them to each sex across the 1-5 scale results. The beside=TRUE argument makes the plot into a side-by-side chart rather than a stacked barplot.
