@@ -9,12 +9,9 @@ Three statisticians live on a city block...
 
 ## (a)
 
-Let $X_a$, $X_b$ and $X_c$ be the number of candies received at each
-statistician's home, respectively. Create three vectors `x.a`, `x.b` and `x.c`
-containing the possible values for these three random variables, and three
-vectors `f.a`, `f.b` and `f.c` representing their probability mass function.
+Let $X_a$, $X_b$ and $X_c$ be the number of candies received at each statistician's home, respectively. Create three vectors `x.a`, `x.b` and `x.c` containing the possible values for these three random variables, and three vectors `f.a`, `f.b` and `f.c` representing their probability mass function.
 
----
+------------------------------------------------------------------------
 
 ```{r}
 x.a <- 1:6; f.a <- rep(1/length(x.a), length(x.a))
@@ -22,16 +19,13 @@ x.b <- 0:6; f.b <- dbinom(0:6, p=1/2, size=6)
 x.c <- 0:4; f.c <- dbinom(0:4, p=3/4, size=4)
 ```
 
-Note that it is quite possible to get 0 candies when you rely on coin flips,
-which means that the support for this distribution is slightly different than
-for the die roll, where 0 is not a possible outcome.
+Note that it is quite possible to get 0 candies when you rely on coin flips, which means that the support for this distribution is slightly different than for the die roll, where 0 is not a possible outcome.
 
 ## (b)
 
-Plot each of the three probability distributions identified in part 1. Can you
-name any of these distributions?
+Plot each of the three probability distributions identified in part 1. Can you name any of these distributions?
 
----
+------------------------------------------------------------------------
 
 ```{r}
 par(mfrow = c(1, 3), bty = "l", cex.lab = 1.5)
@@ -49,24 +43,15 @@ plot(x.c, f.c, type = "h", lwd = 2,
 points(x.c, f.c, pch = 19, col = "blue", cex = 2)
 ```
 
-The first distribution is known as a discrete uniform distribution: $Xa \sim
-\operatorname{Discrete Uniform}(a = 1, b = 6)$ (see:
-http://en.wikipedia.org/wiki/Discrete_uniform_distribution). The second is a
-binomial with probability 1/2, size = 6, or: $X_b \sim \operatorname{Binomial}(n
-= 6, p = 0.5)$. Recall that the binomial process models multiple attempts (here,
-6 tries) with a fixed probability (here, $p$ of the coin flip is 1/2). Finally,
-and reasoning similarly, $X_c \sim \operatorname{Binomial}(n = 4, p = 3/4)$.
+The first distribution is known as a discrete uniform distribution: $Xa \sim \operatorname{Discrete Uniform}(a = 1, b = 6)$ (see: http://en.wikipedia.org/wiki/Discrete_uniform_distribution). The second is a binomial with probability 1/2, size = 6, or: $X_b \sim \operatorname{Binomial}(n = 6, p = 0.5)$. Recall that the binomial process models multiple attempts (here, 6 tries) with a fixed probability (here, $p$ of the coin flip is 1/2). Finally, and reasoning similarly, $X_c \sim \operatorname{Binomial}(n = 4, p = 3/4)$.
 
 ## (c)
 
 Calculate $\mathbb{E}(X_k)$ and $\operatorname{Var}(X_k)$.
 
----
+------------------------------------------------------------------------
 
-Recall that the definition of expectation for a discrete distribution is
-$\mathbb{E}(X) = \sum_{i=1}^k x_i f_i$, where $x_i$ represents all the possible
-values of $X$ and $f_i$ represents the p.m.f. Thus, for the discrete uniform
-distribution, we write:
+Recall that the definition of expectation for a discrete distribution is $\mathbb{E}(X) = \sum_{i=1}^k x_i f_i$, where $x_i$ represents all the possible values of $X$ and $f_i$ represents the p.m.f. Thus, for the discrete uniform distribution, we write:
 
 $$\mathbb{E}(X_a) = \sum_{i=1}^6 \frac{i}{6} = \frac{1}{6}(1 + 2 + 3 + 4 + 5 +
 6) = 21 / 6 = 3.5$$
@@ -76,19 +61,13 @@ and the variance is given by:
 $$\operatorname{Var}(X_a) = \sum_{i=1}^6 \frac{(i- 7/2)^2}{6} = 35 / 12 =
 2.91666$$
 
-This is short enough to do by hand (the mean you can get even by intuition).
-However, a general result about sums[^1]:
+This is short enough to do by hand (the mean you can get even by intuition). However, a general result about sums[^1]:
+
+[^1]: According to a possibly apocryphal story, this formula was derived by an eight year old Karl Gauss when, as punishment for misbehaving in school, his teacher told him to add all the numbers from 1 to 100.
 
 $$\sum_{i=1}^n i = \frac{n(n-1)}{2}$$
 
-We can use this to write a general expression for the expectation of a discrete
-uniform variable $X \sim \operatorname{DiscreteUniform}(a = 1, b)$:
-$\mathbb{E}(X) = \frac{1}{b}\frac{b(b-1)}{2}$$. In our case, this is exactly
-$(6+1)/2 = 3.5$. The variance of the discrete uniform is slightly more involved
-to derive, but is given by the simple formula, $\operatorname{Var}(X) =
-\frac{b^2 - 1}{12}$, or, in our case, exactly $(36 - 1)/12$.
-
-[^1]: According to a possibly apocryphal story, this formula was derived by an eight year old Karl Gauss when, as punishment for misbehaving in school, his teacher told him to add all the numbers from 1 to 100.
+We can use this to write a general expression for the expectation of a discrete uniform variable $X \sim \operatorname{DiscreteUniform}(a = 1, b)$: $\mathbb{E}(X) = \frac{1}{b}\frac{b(b-1)}{2}$\$. In our case, this is exactly $(6+1)/2 = 3.5$. The variance of the discrete uniform is slightly more involved to derive, but is given by the simple formula, $\operatorname{Var}(X) = \frac{b^2 - 1}{12}$, or, in our case, exactly $(36 - 1)/12$.
 
 The mean and variance of the binomial distribution are $\mathbb{E}(X) = np$ and $\operatorname{Var}(X) = np(1 - p)$. Thus,
 
@@ -99,9 +78,7 @@ $$\begin{aligned}
 \times (3/4) = 0.75
 \end{aligned}$$
 
-Of course, we do not actually need to know or be able to derive anything as long
-as we have the complete distribution on hand in R. Here are the calculations
-(with the output):
+Of course, we do not actually need to know or be able to derive anything as long as we have the complete distribution on hand in R. Here are the calculations (with the output):
 
 ```{r}
 x.a.mean <- sum(x.a*f.a); x.a.var <- sum((x.a - x.a.mean)^2 * f.a)
@@ -111,8 +88,7 @@ c(x.a.mean, x.b.mean, x.c.mean)
 c(x.a.var, x.b.var, x.c.var)
 ```
 
-The expectation and variance of $Y = X_a + X_b + X_c$ are the sums of the
-expectations and variances. Thus:
+The expectation and variance of $Y = X_a + X_b + X_c$ are the sums of the expectations and variances. Thus:
 
 $$\begin{aligned}
 \mathbb{E}(Y) &= 3.5 + 3 + 3\\
@@ -121,12 +97,9 @@ $$\begin{aligned}
 
 ## (d)
 
-Let $Y = X_a + X_b + X_c$ represent the total haul of candies. Simulate this
-process some large number of times (e.g. 10,000) and illustrate the distribution
-of $Y$ . Confirm that the mean and variance are close to the ones that you
-predicted above.
+Let $Y = X_a + X_b + X_c$ represent the total haul of candies. Simulate this process some large number of times (e.g. 10,000) and illustrate the distribution of $Y$ . Confirm that the mean and variance are close to the ones that you predicted above.
 
----
+------------------------------------------------------------------------
 
 ```{r}
 X.a.sim <- sample(1:6, 100000, replace = TRUE)
@@ -138,11 +111,9 @@ mean(Y.sim); var(Y.sim)
 
 ## (e)
 
-Assuming 100 children visit all three homes, use your simulation results to
-approximate how many children do you expect to get fewer than 5 candies? More
-than 12 candies? Is this distribution symmetric?
+Assuming 100 children visit all three homes, use your simulation results to approximate how many children do you expect to get fewer than 5 candies? More than 12 candies? Is this distribution symmetric?
 
----
+------------------------------------------------------------------------
 
 We use the results of the simulation above to illustrate the distribution:
 
@@ -159,22 +130,15 @@ sum(Y.sim < 5)/length(Y.sim) * 100
 sum(Y.sim > 12)/length(Y.sim) * 100
 ```
 
-The expected number of children that get fewer than 5 candies after the three
-visits is about 1. Note that this does not mean that exactly one student will
-necessarily get fewer than 5 candies - it means that there is only a 1% chance
-that you would get so few. On the other hand, there is almost a 10% chance that
-you will get more than 12 candies. So, on balance, the statisticians may be
-strange, but they're not too stingy.
+The expected number of children that get fewer than 5 candies after the three visits is about 1. Note that this does not mean that exactly one student will necessarily get fewer than 5 candies - it means that there is only a 1% chance that you would get so few. On the other hand, there is almost a 10% chance that you will get more than 12 candies. So, on balance, the statisticians may be strange, but they're not too stingy.
 
 # 3. Global earthquakes I
 
 ## (a)
 
-Download the latest earthquake data, load the data, obtain the `Minute` vector
-(as above), and use it to create a vector `W` representing waiting times (in
-minutes) between consecutive earthquakes.
+Download the latest earthquake data, load the data, obtain the `Minute` vector (as above), and use it to create a vector `W` representing waiting times (in minutes) between consecutive earthquakes.
 
----
+------------------------------------------------------------------------
 
 ```{r}
 earthquakes <- read.csv("earthquakes_20151029.csv")
@@ -185,8 +149,7 @@ W <- diff(sort(Minute))
 
 ## (b)
 
-What is the (sample) mean and standard deviation of `W` , the interval between
-consecutive earthquakes occurring in the past week?
+What is the (sample) mean and standard deviation of `W` , the interval between consecutive earthquakes occurring in the past week?
 
 ```{r}
 mean(W)
@@ -200,7 +163,7 @@ sd(W)
 
 Plot a histogram of `W` .
 
----
+------------------------------------------------------------------------
 
 ```{r}
 hist(W, breaks = 50, col = "grey", bor = "darkgrey",
@@ -209,21 +172,16 @@ hist(W, breaks = 50, col = "grey", bor = "darkgrey",
 
 ## (d)
 
-Propose a continuous distribution that models these waiting times. Name the
-distribution and a guess the value of the key parameter(s). Illustrate this
-model over a density histogram of waiting times.
+Propose a continuous distribution that models these waiting times. Name the distribution and a guess the value of the key parameter(s). Illustrate this model over a density histogram of waiting times.
 
----
+------------------------------------------------------------------------
 
-A reasonable model for waiting times of equally likely events in time is the
-exponential distribution. Thus $W \sim \operatorname{Exponential}(\lambda = 1 /
-\bar{W})$, where $\lambda$ represents the rate of the event, and is equal to the
-reciprocal of the average waiting time.
+A reasonable model for waiting times of equally likely events in time is the exponential distribution. Thus $W \sim \operatorname{Exponential}(\lambda = 1 / \bar{W})$, where $\lambda$ represents the rate of the event, and is equal to the reciprocal of the average waiting time.
 
 ```{r}
 hist(W, breaks = 50, col = "grey", bor = "darkgrey", freq = FALSE,
      xlab = "Waiting time (minutes)")
-curve(1/mean(W) * exp(-x / mean(W)), add = TRUE, col = 2, lwd = 2)
+#curve(1/mean(W) * exp(-x / mean(W)), add = TRUE, col = 2, lwd = 2)
 curve(dexp(x, rate = 1/mean(W)), add = TRUE, col = 2, lwd = 2)
 ```
 
@@ -231,23 +189,15 @@ curve(dexp(x, rate = 1/mean(W)), add = TRUE, col = 2, lwd = 2)
 
 What are the assumptions behind your model? Do you think they are appropriate for these data?
 
----
+------------------------------------------------------------------------
 
-We assume that the probability of an earthquake occuring anywhere on earth is
-approximately equal for any interval of time, and that on a global scale
-earthquake events are independent of each other, i.e., they do not cluster too
-much or inhibit each other. The first assumption seems reasonable, the second
-might be more tenuous. Large earthquakes are often followed by aftershocks
-(suggesting clustering), on the other hand I would (perhaps naively) assume that
-a large earthquake releases some physical tension that takes a longer time to
-rebuild. In any case, the model generally seems to hold very well for these
-data.
+We assume that the probability of an earthquake occuring anywhere on earth is approximately equal for any interval of time, and that on a global scale earthquake events are independent of each other, i.e., they do not cluster too much or inhibit each other. The first assumption seems reasonable, the second might be more tenuous. Large earthquakes are often followed by aftershocks (suggesting clustering), on the other hand I would (perhaps naively) assume that a large earthquake releases some physical tension that takes a longer time to rebuild. In any case, the model generally seems to hold very well for these data.
 
 ## (f)
 
 Obtain $N_{hour}$, the number of earthquakes that have occurred in each hour.
 
----
+------------------------------------------------------------------------
 
 Illustating the use of the `cut` function in this context:
 
@@ -257,27 +207,21 @@ N.hour <- as.vector(table(Minute.CutByHour))
 N.hour[1:100]
 ```
 
-Note that in the first 100 hours there are many 0's and 1's (i.e., hours during
-which there were 0 or 1 earthquakes). But also a few hours with as many as 7
-earthquakes.
+Note that in the first 100 hours there are many 0's and 1's (i.e., hours during which there were 0 or 1 earthquakes). But also a few hours with as many as 7 earthquakes.
 
 ## (g)
 
-How do you predict this quantity is distributed? Name the distribution a guess
-for the value of the key parameter(s).
+How do you predict this quantity is distributed? Name the distribution a guess for the value of the key parameter(s).
 
----
+------------------------------------------------------------------------
 
-This is a discrete distribution that models the number of completely random
-events that occur in an interval. The model for this process is the Poisson
-distribution, with the mean parameter $\lambda^*$ equal to the expected number
-of earthquakes per hour. In our case, $\lambda^* = 60/\bar{W} = 1.57371$.
+This is a discrete distribution that models the number of completely random events that occur in an interval. The model for this process is the Poisson distribution, with the mean parameter $\lambda^*$ equal to the expected number of earthquakes per hour. In our case, $\lambda^* = 60/\bar{W} = 1.57371$.
 
 ## (h)
 
 Illustrate the empirical distribution and theoretical prediction for Nhour .
 
----
+------------------------------------------------------------------------
 
 ```{r}
 plot(0:8, dpois(0:8, lambda = 60 / mean(W)), type = "h", lwd = 10, col = "lightblue",
@@ -292,11 +236,9 @@ legend("topright", lty = 1, col = c("red", "lightblue"),
 
 ## (a)
 
-Write a function for the $\operatorname{Gamma}(k = 2, \lambda)$ distribution called
-`Gamma2PDF(x, lambda)` and confirm that it is a valid pdf by integrating it from 0
-to $\infty$.
+Write a function for the $\operatorname{Gamma}(k = 2, \lambda)$ distribution called `Gamma2PDF(x, lambda)` and confirm that it is a valid pdf by integrating it from 0 to $\infty$.
 
----
+------------------------------------------------------------------------
 
 ```{r}
 Gamma2PDF <- function(x, lambda){
@@ -307,14 +249,11 @@ integrate(Gamma2PDF, 0, Inf, lambda = 1)
 
 ## (b)
 
-Illustrate the pdf for $\lambda = 1$ and $\lambda = 2$. Calculate the means and
-variances of these two distributions, and plot them with vertical lines at
-the mean $\pm 1$ standard deviation.
+Illustrate the pdf for $\lambda = 1$ and $\lambda = 2$. Calculate the means and variances of these two distributions, and plot them with vertical lines at the mean $\pm 1$ standard deviation.
 
----
+------------------------------------------------------------------------
 
-You can calculate the means and variances by looking up their formulas,
-performing the integrals on paper, or using R as follows:
+You can calculate the means and variances by looking up their formulas, performing the integrals on paper, or using R as follows:
 
 ```{r}
 gamma1.mean <- integrate(function(x) x * Gamma2PDF(x, lambda = 1), 0, Inf)$value
@@ -330,8 +269,7 @@ data.frame(lambda = c(1, 2),
            vars = c(gamma1.var, gamma2.var))
 ```
 
-The mean is always $2\lambda$, the variance is $2\lambda^2$. Here is one plot
-showing all I asked for:
+The mean is always $2\lambda$, the variance is $2\lambda^2$. Here is one plot showing all I asked for:
 
 ```{r}
 curve(Gamma2PDF(x, lambda = 1), col = 1, lwd = 2, xlim = c(0, 8),
@@ -345,8 +283,7 @@ legend("topright", lwd = 2, col = 1:2, legend = 1:2, title = expression(lambda),
        bty = "n")
 ```
 
-Note how I used the `expression` function to draw a Greek $\lambda$. This plot
-is a bit busy, so here's a version which shows the distributions side by side:
+Note how I used the `expression` function to draw a Greek $\lambda$. This plot is a bit busy, so here's a version which shows the distributions side by side:
 
 ```{r}
 par(mfrow  =  c(1, 2))
@@ -362,12 +299,9 @@ abline(v = gamma2.mean + c(-1, 0, 1) * sqrt(gamma2.var), lty = c(3, 2, 3),
 
 ## (c)
 
-Simulate two random vectors `X1` and `X2` from an
-$\operatorname{Exponential}(2)$ distribution. Plot the histogram of the paired
-sum of these vectors, and confirm that the resulting distribution is
-$\operatorname{Gamma}(2, 2)$ by drawing a curve over the histogram.
+Simulate two random vectors `X1` and `X2` from an $\operatorname{Exponential}(2)$ distribution. Plot the histogram of the paired sum of these vectors, and confirm that the resulting distribution is $\operatorname{Gamma}(2, 2)$ by drawing a curve over the histogram.
 
----
+------------------------------------------------------------------------
 
 ```{r}
 Y <- rexp(10000, rate = 1 / 2) + rexp(10000, rate = 1 / 2)
@@ -380,24 +314,17 @@ curve(Gamma2PDF(x, lambda = 2), lwd = 2, col = 2, add = TRUE)
 
 ## (a)
 
-Based on the definition of the Gamma distribution and the results from the
-problem above, propose a model for the expected waiting time for two earthquake
-events on the globe.
+Based on the definition of the Gamma distribution and the results from the problem above, propose a model for the expected waiting time for two earthquake events on the globe.
 
----
+------------------------------------------------------------------------
 
-Because earthquake waiting times are exponential with mean around 34 minutes, the interval between every
-other earthquake should be Gamma-distributed with $\lambda \approx 34$ and shape parameter 2.
+Because earthquake waiting times are exponential with mean around 34 minutes, the interval between every other earthquake should be Gamma-distributed with $\lambda \approx 34$ and shape parameter 2.
 
 ## (b)
 
-Obtain from the global earthquake data a vector `W2` representing the time between
-two consecutive events. Plot a histogram of these results and draw the curve of
-your Gamma distribution model over it using your function. Confirm that is gives
-the same curve as R's built-in Gamma distribution function (predictably:
-`dgamma`).
+Obtain from the global earthquake data a vector `W2` representing the time between two consecutive events. Plot a histogram of these results and draw the curve of your Gamma distribution model over it using your function. Confirm that is gives the same curve as R's built-in Gamma distribution function (predictably: `dgamma`).
 
----
+------------------------------------------------------------------------
 
 ```{r}
 # using the "Minute" object from the previous problem
@@ -413,6 +340,4 @@ hist(W2, col = "grey", bor = "darkgrey", breaks = 50, freq = FALSE,
 curve(dgamma(x, shape = 2, scale = mean(W)), lwd = 2, col = 3, add = TRUE)
 ```
 
-Looks like a pretty decent fit. Though, again, note that there are a few very
-small intervals - possibly too many, suggesting that at times earthquakes come
-one immediately after another. This is almost certainly not a coincidence.
+Looks like a pretty decent fit. Though, again, note that there are a few very small intervals - possibly too many, suggesting that at times earthquakes come one immediately after another. This is almost certainly not a coincidence.

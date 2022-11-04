@@ -5,6 +5,8 @@ editor: visual
 ---
 
 ```{r}
+#| message: false
+#| warning: false
 library(tidyverse, quietly = TRUE, warn.conflicts = F)
 ```
 
@@ -127,3 +129,111 @@ pingpong_chart
 ```
 
 In the barplot function, the col() argument controls the number of colors assigned to the chart. The provided code is choosing colors and assigning them to each sex across the 1-5 scale results. The beside=TRUE argument makes the plot into a side-by-side chart rather than a stacked barplot.
+
+### 4. Global Patterns
+
+#### 4.a Load data
+
+```{r}
+country_data <- readr::read_csv(here::here("Q1", "week_2", "CountryData.csv"), show_col_types = FALSE)
+```
+
+#### 4.b
+
+```{r}
+highest_gdp <- country_data$Country[order(country_data$GDP, decreasing = TRUE)][1:10]
+
+lowest_gdp <- country_data$Country[order(country_data$GDP, decreasing = FALSE)][1:10]
+
+
+highest_birth_rate <- country_data$Country[order(country_data$Birthrate, decreasing = TRUE)][1:10]
+
+lowest_birth_rate <- country_data$Country[order(country_data$Birthrate, decreasing = FALSE)][1:10]
+
+lowest_literacy <- country_data$Country[order(country_data$Literacy, decreasing = FALSE)][1:10]
+
+highest_gdp
+lowest_gdp
+highest_birth_rate
+lowest_birth_rate
+lowest_literacy
+
+```
+
+There are inverse relationships between GDP and birth rate and between GDP and literacy. Several of the countries with the lowest GDP have the highest birth rates. Several countries with the highest GDP have the lowest birth rates. Literacy rates for the countries with the lowest literacy seem to be tracking with low GDP.
+
+#### 4.c Calculate Density
+
+```{r}
+country_data_density <- country_data %>% 
+  mutate(density = Area/Population)
+
+```
+
+#### 4.d Density statistics
+
+```{r}
+high_density <- country_data_density %>% 
+  filter(Area >0) %>% 
+  drop_na(density) %>% 
+  arrange(density) %>% 
+  slice_head(n=10) %>% 
+  select(Country, Population, Area, Water)
+
+low_density <- country_data_density %>% 
+   drop_na(density) %>%
+  arrange(density) %>% 
+  slice_tail(n=10)%>% 
+  select(Country, Population, Area, Water)
+
+high_density
+
+low_density
+```
+
+#### 4.e Frequency Histogram of Birth Rates
+
+```{r}
+
+birth_rate_freq <- country_data %>% 
+  filter(Continent %in% c("Europe", "Asia", "Africa")) %>% 
+  ggplot()+
+  geom_histogram(aes(Birthrate, fill = Continent),
+                 colour = "black",
+                 lwd = 0.1,
+                 linetype = 1,
+                 alpha=0.5, 
+                 position= "identity",
+                 bins = 40)+
+  ggtitle("Birth Rates for Countries in Africa, Asia and Europe")+
+  ylab("Count of Countries")
+  
+
+birth_rate_freq
+
+
+```
+
+```{r}
+birth_rate_density <- country_data %>% 
+  filter(Continent %in% c("Europe", "Asia", "Africa")) %>% 
+  ggplot()+
+  geom_density(aes(Birthrate, fill = Continent),
+                 colour = "black",
+                 lwd = 0.1,
+                 linetype = 1,
+                 alpha=0.5, 
+                 position= "identity")+
+  ggtitle("Density Curves for Birth Rates of Countries in Africa, Asia and Europe")+
+  ylab("Density")
+  
+
+birth_rate_density
+
+```
+
+The density plot shows that the shape of the distribution is different for all three continents. Countries in Africa tend to have higher birthrates, although there is a long left tail, indicating that the data is not normally distributed and that there are countries in Africa that have birth rates at or below birthrates in other parts of the world. It's also worth noting that there are 16 countries missing birthrates. Many of those countries were in Africa. Also, I noticed some obvious data errors. For example, the United States was coded as being in Oceania. With this being said, I have significant doubts about the trustworthiness of the data and would advocate for further data cleaning work before drawing conclusions based on the data.\
+\
+Birthrates in Asia seem to be relatively normally distributed, with a mean around 20. It is notable that the span of the distribution includes both extremely high and extremely low values. Based on this data, it seems as if countries in Asia are more likely to have a low birthrate than a high one, but the overall birthrates are higher than they are in Europe.
+
+The countries in Europe are highly clustered with a mean near 10 and a max birthrate of 18.41. However, it is worth noting that several countries in Europe have values of 0 entered for their birthrate. This is clearly inaccurate, as very few places in the world have a birthrate of 0. This could be leading to an artificially low mean for the density plot for Europe. As the data currently is, it is unimodal and has a short right tail.

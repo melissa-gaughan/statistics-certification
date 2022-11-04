@@ -1,0 +1,502 @@
+---
+title: "UW STATR 501A - Homework #4"
+author: "Melissa Gaughan"
+date: "`r Sys.Date()`"
+format: docx
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Instructions
+
+Please submit a single zipped folder with all associated files \[text report (.pdf, .docx, .txt), R code (.R, .Rmd), data files (.csv, .xlsx, .txt)\]. Upload the completed homework assignment into the Canvas drop-box.
+
+Probability problems may be unintuitive - hence the emphasis on simulation. Please discuss the problems amongst yourselves on the forum, but make sure to submit your own work (code and text).
+
+## Problem #1 - Reading
+
+### Part a
+
+Read the file lab4_corrected.html (under modules of the course site)
+
+### Part b
+
+Read Ch. 1 Probability Models and Ch. 2 Random Variables and Distributions in Probability and Statistics.
+
+### Part c
+
+Read Ch. 8 Probability Distributions in An Introduction to R.
+
+## Problem #2 - Random Variables I
+
+### Part a
+
+Simulate 1000 numbers from the [standard uniform distribution](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) $X \sim Unif(0,1)$, and report the [sample standard deviation](https://en.wikipedia.org/wiki/Standard_deviation#Sample_standard_deviation) ($s_{x}$) of these numbers.
+
+```{r 2a}
+
+#<Write code here>
+
+sample_1000 <- runif(1000)
+
+standard_deviation <- sqrt(var(sample_1000))
+
+```
+
+### Part b
+
+Write a function that returns $s_{x}$ of $n$ draws from a $Unif(0,b)$ distribution, where $b$ is the upper limit
+
+```{r 2b}
+
+#<Write code here>
+
+standard_deviation_function <- function(n = 1000, upper_limit = 1){
+  sample <- runif(n = n, 
+                    min = 0, 
+                    max = upper_limit)
+
+standard_deviation <- sqrt(var(sample))
+
+return(standard_deviation)
+  
+}
+
+
+standard_deviation_function(n = 50, upper_limit = 500)
+```
+
+### Part c
+
+Obtain the values $s_{x}$ against values of $b$ ranging from 1 to 10 (using any large value of $n$ of your choosing). Is there a consistent pattern? Can you propose a model that predicts $s_{x}$ with upper limit $b$?
+
+```{r 2c}
+results <- rep(as.numeric(NA), 10)
+#<Write code here>
+
+for (i in seq(1:10)){
+  test <- standard_deviation_function(n = 10000, upper_limit = i)
+  results[i] <- test
+}
+
+results
+
+results[1] - results[2]
+results[2] - results[3]
+results[3] - results[4]
+results[4] - results[5]
+
+
+0.288 + 11*.288
+
+10*.288
+
+11*.288
+
+```
+
+The results sample standard deviation seems to increase by approximately 0.288 as the upper limit increases by 1. I would propose that the standard deviation could be predicted by multiplying the upper limit by 0.288.
+
+## Problem #3 - Random Variables II
+
+### Part a
+
+Generate two vectors $X_{1}$ and $X_{2}$, each of which represents 10,000 draws from the $Unif(0,1)$ distribution. Obtain the pairwise sum of these vectors ($Y_{2} = X_{1} + X_{2}$) and plot the density histogram of $Y$.
+
+```{r 3a}
+
+#<Write code here>
+
+sample_1 <- runif(n = 10000, 
+                    min = 0, 
+                    max = 1)
+ 
+sample_2 <- runif(n = 10000, 
+                    min = 0, 
+                    max = 1)
+combined_sample <- sample_1+sample_2
+
+data <- as_tibble(combined_sample)
+
+density_plot <-  
+  ggplot2::ggplot(data)+
+  ggplot2::geom_density(aes(x= value))
+
+density_plot
+
+```
+
+### Part b
+
+Guess what the probability distribution function (p.d.f.) of $Y_{2}$ might be (i.e. describe it mathematically with a pairwise function), and illustrate it with a line over the histogram.
+
+```{r 3b}
+hist(combined_sample, probability = TRUE, xaxs = "i", yaxs = "i", ylim = c(0, 1))
+lines(c(-10, 0, 1, 2, 10), c(0, 0, 1, 0, 0))
+
+```
+
+### Part c
+
+Similarly, obtain $Y_{5} = X_{1} + X_{2} + ... + X_{5}$ and $Y_{10}$. Plot on a single 4x2 figure the respective histograms and qqnorm plots of $X_{1}, Y_{2}, Y_{5}, Y_{10}$. What do you observe?
+
+```{r 3c}
+
+#<Write code here>
+
+
+combined_sample_5 <- runif(10000, 0, 1)
+for (i in 2:5) {
+  combined_sample_5 <- combined_sample_5 + runif(10000, 0, 1)
+}
+
+combined_sample_10 <- runif(10000, 0, 1)
+for (i in 2:5) {
+  combined_sample_10 <- combined_sample_10 + runif(10000, 0, 1)
+}
+
+tibble_1 <- as_tibble(sample_1)
+
+tibble_2 <- as_tibble(combined_sample)
+
+tibble_5 <- as_tibble(combined_sample_5)
+
+tibble_10 <- as_tibble(combined_sample_10)
+tables <- list(tibble_1, tibble_2, tibble_5, tibble_10)
+
+for(i in seq_along(tables)){
+ # i = 1
+  density_plot <-  ggplot2::ggplot(tables[[i]])+
+  ggplot2::geom_density(aes(x= value))+
+  labs(title ="Density Plot", 
+   
+       ylab = "Density")
+  
+  qqplot <-   ggplot2::ggplot(tables[[i]])+
+  ggplot2::geom_qq(aes(sample= value)) +
+    labs(title = "QQ Plot ")
+  
+  print( density_plot / qqplot)
+
+
+}
+ 
+
+
+```
+
+As more observations are taken from the normal distribution, the data becomes more normal (the QQ plot approaches a diagonal line with a positive slope). This is an example of the Central Limit Theorem.
+
+## Problem #4 - De Méré's Wager I
+
+[Antoine Gombaud](https://en.wikipedia.org/wiki/Antoine_Gombaud), a.k.a. the Chevalier de Méré (1607-1684) was a "gentleman gambler" (and amateur mathematician) in France. One game de Méré enjoyed playing (though it sounds awfully boring to me) would be to bet with even odds (i.e. lose a franc if you lose, win a franc if you win) on getting at least one six on four rolls of a fair die. He reasoned that the chance of getting a six in one roll of a die is $1/6$, so the chance of getting one six in four would be $4/6=2/3$.
+
+### Part a
+
+Write a function `DeMereA(n)` that simulates this game, i.e. takes a certain number $(n)$ of rolls of a die and returns a `TRUE` if there is at least one six and a `FALSE` if there isn't.
+
+```{r 4a}
+
+#<Write code here>
+
+DeMere_A <- function(number_rolls = 10){
+  sample <- as.vector(c(1L:6L))
+  
+    result <- sample(x = sample, size = number_rolls, 
+                         replace = T)
+    
+    if( 6 %in% result){
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+  
+  
+
+
+
+
+
+```
+
+### Part b
+
+Simulate 1000 of these games and compute the number of times he wins.
+
+```{r 4b}
+
+#<Write code here>
+
+
+DeMere_B <- function(number_rolls = 10){
+  sample <- as.vector(c(1L:6L))
+  
+    result <- sample(x = sample, size = number_rolls, 
+                         replace = T)
+    
+    wins <- result[result==6]
+    
+    return(length(wins))
+    
+}
+
+DeMere_B(number_rolls = 1000)
+
+```
+
+### Part c
+
+De Méré's reasoning was faulty, but he still won a lot of money playing this (frankly, kind of stupid) game. What is the actual probability of getting at least one six in four rolls? (Use math or simulate in R)
+
+```{r 4c}
+
+#<Write code here>
+
+1-(5/6)^4
+
+```
+
+## Problem #5 - De Méré's Wager II
+
+Despite the faulty reasoning, de Méré actually won a lot of money playing this game but became bored of it. So, to make things mildly more interesting, he devised a second game. In this one, he would wager - again with even odds - on getting at least one double six on 24 rolls of a pair of dice. He reasoned correctly that the chance of getting a double six in rolling a pair of dice is $1/36$. So he assumed that in 24 rolls of a pair of dice, the chance of getting one double six would be $24/36=2/3$.
+
+### Part a
+
+Write an analogous function `DeMereB(n)` that simulates the 24 roll game with double dice.
+
+```{r 5a}
+
+#<Write code here>
+
+DeMere_24 <- function(number_rolls = 24){
+  sample <- as.vector(c(1L:6L))
+  
+    result_1 <- as_tibble_col(sample(x = sample, 
+                                     size =  number_rolls, 
+                                     replace = T), 
+                              column_name = "die_1")
+    
+    result_2 <- as_tibble_col(sample(x = sample,
+                                     size = number_rolls, 
+                                     replace = T), 
+                              column_name = "die_2")
+    
+    
+    
+    wins_1 <- bind_cols(result_1, result_2) %>% 
+      filter(die_1 == 6 & die_2 ==6)
+    
+    
+    
+    return(nrow(wins_1))
+    
+}
+
+DeMere_24(number_rolls = 24)
+
+```
+
+### Part b
+
+Simulate 1000 of these games and compute the number of victories.
+
+```{r 5b}
+
+#<Write code here>
+DeMere_24_results <- replicate(1000, DeMere_24(24))
+
+
+sum(DeMere_24_results)
+```
+
+### Part c
+
+Again, de Méré's reasoning was faulty. Compute the actual probability of getting at least one double six in twenty four rolls. (Use math or simulate in R)
+
+```{r 5c}
+
+#<Write code here>
+1-(35/36)^24
+```
+
+Based on more empirical data (i.e. losing a lot of money), he knew something was not quite right in the second game of dice. So he challenged his famous friend [Blaise Pascal](https://en.wikipedia.org/wiki/Blaise_Pascal) to help him find an explanation. In a series of letters between Pascal and [Pierre de Fermat](https://en.wikipedia.org/wiki/Pierre_de_Fermat), not only did de Méré learn not to make naive calculations, but the foundation was laid for the theory of probability.
+
+## Problem #6 - Card Playing
+
+A standard playing deck of 52 cards consists of 13 unique valued cards (2 to 10, and four face cards: the Ace, Jack, Queen, and King) each in 4 different suits (hearts, diamonds, clubs, and spades). You can generate a complete deck of cards in R using something like the following code, although I recommend you simplify this deck to just what's necessary to simulate each question.
+
+```{r 6, echo = TRUE}
+
+CardNames <- c(2:10, "Jack", "Queen", "King", "Ace")
+Deck <- c(paste(CardNames, "of Diamonds"),
+          paste(CardNames, "of Hearts"),
+          paste(CardNames, "of Clubs"),
+          paste(CardNames, "of Spades"))
+
+rm(CardNames)
+
+print(c(head(Deck), tail(Deck)))
+```
+
+And then we can "draw" five cards simply with: `sample(Deck, 5, replace = TRUE)`.
+
+### Part a
+
+How many possible hands of five unique cards can be drawn from a deck of cards? (Note: cards are drawn without replacement)
+
+```{r}
+factorial(52)/ factorial(52-5)/factorial(5)
+
+```
+
+### Part b
+
+In poker, a flush is defined as five cards of the same suit, regardless of the value of the card. Write a function called `IsFlush()` that draws five cards from a deck, determines whether or not it is a flush, and returns the appropriate logical value.
+
+```{r 6b}
+
+#<Write code here>
+is_flush <- function(number_cards = 5){
+  
+  hand <- as_tibble_col(sample(Deck, number_cards, replace = FALSE), column_name = "hand")
+  
+  suites <- hand %>% 
+    mutate(suite = sub(".*of ","", hand ))
+  
+  unique_suites <- unique(suites$suite)
+  
+  if(length(unique_suites) ==1){
+    return(TRUE)
+  }else{
+    return(FALSE)
+  }
+  
+}
+
+
+is_flush(number_cards = 5)
+```
+
+### Part c
+
+Simulate this process 10,000 times and count how many times you draw a flush. What is the approximate probability of a flush based on this experiment? (Note: this can be approached with a loop or `apply()` on a matrix of decks)
+
+```{r 6c}
+
+#<Write code here>
+
+flush_simulation <- replicate(10000, is_flush(number_cards = 5))
+
+
+sum(flush_simulation[flush_simulation==TRUE])
+
+```
+
+Based on this experiment, the chance of drawing a flush is 0.0022%. My function showed a total of 22 flushes in 10,000 simulations.
+
+### Part d
+
+A straight is a sequence of five cards in numerical order (note: for simplicity we define Ace = 13 only. So Ace-2-3-4-5 is not considered a straight). Repeate exercises (b) and (c) for the straight (i.e. create a function `IsStraight()` and repeat the experiment 10,000 times)
+
+```{r 6d}
+
+#<Write code here>
+
+is_straight <- function(number_cards = 5){
+  
+  hand <- as_tibble_col(sample(Deck, number_cards, replace = FALSE), column_name = "hand")
+  
+  numbers <- hand %>% 
+    mutate(card_value = sub(" of.*","", hand )) %>% 
+    mutate( card_value_numeric = 
+              case_when(card_value == "Jack"~ "11", 
+                card_value== "Queen"~ "12",
+                card_value== "King"~ "13", 
+                card_value== "Ace"~ "14",
+                TRUE ~ card_value)
+                                           ) %>% 
+    mutate(card_value_numeric = as.numeric(card_value_numeric)) %>% 
+    arrange(card_value_numeric) %>% 
+    mutate(value_difference = card_value_numeric -lag(card_value_numeric))
+    
+  
+
+  
+  if(sum(numbers$value_difference, na.rm = T ) ==4){
+    return(TRUE)
+  }else{
+    return(FALSE)
+  }
+  
+}
+
+straight_simulation <- replicate(10000, is_straight(number_cards = 5))
+
+
+sum(straight_simulation[straight_simulation==TRUE])
+
+
+
+```
+
+### Part e
+
+Based on these results, which is the more likely hand to be dealt in a game of poker?
+
+My function returned 252 straights in 10,000 draws (an approximate probability of 0.0252%). It's much more likely that you will get a straight than a flush.
+
+## Problem #7 - Airplane Functioning
+
+You are planning on taking a flight on Epsilon Airlines across the Pacific Ocean. To have a successful flight, 100 different components on the plane must ALL function correctly. Each of these components has a probability 0.001 of failing.
+
+### Part a
+
+Use the `rbinom()` function to simulate a flight on Epsilon airline by creating a vector of 100 elements which succeed or fail with the appropriate probability.
+
+```{r 7a}
+
+#<Write code here>
+airplane_parts <- rbinom(100,1, 0.001)
+```
+
+### Part b
+
+Use the `rbinom()` function in a slightly different way to produce a vector of length 1,000,000 in which each element is the number of components that fail in each flight. Use this vector to produce an estimate of the probability of failure for the plane.
+
+```{r 7b}
+
+#<Write code here>
+part_failures <- rbinom(1000000, 100, 0.001)
+
+failure_odds <- mean(part_failures > 0)
+
+```
+
+### Part c
+
+Based on this result, would you take a flight on Epsilon airlines? Why or why not?
+
+No, definitely not. The probability of something going wrong with the plane is `r failure_odds`. That's well above my level of risk tolerance.
+
+### Part d
+
+Using `dnorm()`, calculate the exact probability that the flight will not be successful. What important assumption are you making in this calculation (and the previous simulations)?
+
+```{r 7d}
+
+#<Write code here>
+sum(dbinom(1:100, 100, 0.001))
+
+
+```
+
+The major assumption that we have made in this problem is that the failure of one part will not cause the failure of other parts. We are assuming that all parts in this airplane are independent of each other.

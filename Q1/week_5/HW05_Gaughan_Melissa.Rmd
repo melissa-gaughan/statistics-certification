@@ -1,0 +1,459 @@
+---
+title: "UW STATR 501A - Homework #5"
+author: "<Melissa Gaughan>"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+#<Load and assign your .csv data sets here>
+
+```
+
+# Instructions
+
+Please submit a single zipped folder with all associated files \[text report (.pdf, .docx, .txt), R code (.R, .Rmd), data files (.csv, .xlsx, .txt)\]. Upload the completed homework assignment into the Canvas drop-box.
+
+## Problem #1 - Reading
+
+### Part a
+
+Read the file lab5.html (under modules of the course site)
+
+### Part b
+
+Read Ch. 3 Expectation in Probability and Statistics.
+
+### Part c
+
+Read Ch. 9 Grouping, Loops, and Conditional Execution and Ch. 10 Writing Your Own Functions in An Introduction to R.
+
+## Problem #2 - The Fibonacci Sequence
+
+The Fibonacci sequence is a series of integers such that $F_{n} = F_{n-1} + F_{n - 2}$, except that $F_{1} = F_{2} = 1$. Thus: $F = \left\{ 1, 1, 2, 3, 5, 8, 13, ... \right\}$. Below is a `while()` loop that computes the Fibonacci numbers less than 300 in R:
+
+```{r 2, echo = TRUE}
+
+Fib1 <- 1
+Fib2 <- 1
+Fibonacci <- Fib2
+while (Fib2 < 300) {
+  Fibonacci <- c(Fibonacci, Fib2)
+  oldFib2 <- 
+  Fib2 <- Fib1 + Fib2
+  Fib1 <- Fib2
+}
+
+Fibonacci
+
+rm(Fib1, Fib2, Fibonacci, oldFib2)
+
+```
+
+This code cumulatively builds the Fibonacci sequence by adding the last two terms (`Fib1` and `Fib2`) and then iteratively bumping their definitions down the line, using `oldFib2` as an intermediate stepping stone.
+
+### Part a
+
+The variable `oldFib2` isn't strictly necessary. Rewrite the Fibonacci `while()` loop with the update of `Fib1` based just on the current values of `Fib1` and `Fib2`.
+
+```{r 2a}
+
+#<Write code here>
+
+Fib1 <- 1
+Fib2 <- 1
+Fibonacci <- Fib2
+while (Fib2 < 300) {
+  Fibonacci <- c(Fibonacci, Fib2)
+ Fib2 <- Fib1 + Fib2
+ Fib1 <- tail(Fibonacci, n=1)
+}
+
+Fibonacci
+
+rm(Fib1, Fib2, Fibonacci, oldFib2)
+
+```
+
+### Part b
+
+In fact, `Fib1` and `Fib2` aren't necessary either. Rewrite the Fibonacci `while()` loop without using any variables ecept `Fibonacci`.
+
+```{r 2b}
+
+#<Write code here>
+
+
+Fibonacci <- c(0,1)
+while (Fibonacci[length(Fibonacci)] + 
+       Fibonacci[length(Fibonacci) -1] < 300) {
+ 
+   Fibonacci <- c(Fibonacci, 
+    (Fibonacci[length(Fibonacci)] + Fibonacci[length(Fibonacci)-1]))
+ 
+  }
+
+Fibonacci
+
+
+
+```
+
+### Part c
+
+Determine the number of Fibonacci numbers less than 1,000,000.
+
+```{r 2c}
+
+#<Write code here>
+
+
+Fibonacci <- c(0,1)
+while (Fibonacci[length(Fibonacci)] + 
+       Fibonacci[length(Fibonacci) -1] < 1000000) {
+ 
+   Fibonacci <- c(Fibonacci, 
+    (Fibonacci[length(Fibonacci)] + Fibonacci[length(Fibonacci)-1]))
+ 
+  }
+
+
+```
+
+Note: this exercise is lifted verbatim from Braun and Murdoch's book A First Course in Statistical Programming with R (exercises, 1, 2, and 3 on page 55). This book does a nice job of walking through basic programming concepts and their implementation in R - very good for beginning programmers.
+
+## Problem #3 - Halloween Problem
+
+Three statisticians live on a city block. Being statisticians, they enjoy making Halloween way more complicated and terrifying than it needs to be by distributing candy probabilistacally. Mr. Abraham Abel has the trick-or-treater roll a six-sided die and gives out as many candies as the number that is rolled. Mrs. Bernice Bernoulli has the trick-or-treater flip a coin 6 times, and gives out the total number of heads that turn up. Dr. Charles Cauchy lets trick-or-treaters draw a single card 4 times from a shuffled deck - replacing the card and reshuffling between every draw - and gives a candy out every time that the card is NOT a heart (Note: a standard deck of card contains the suits: hearts, diamonds, clubs, and spades).
+
+### Part a
+
+Let $X_{a}, X_{b}, X_{c}$ be the number of candies received at each statistician's home, respectively. Create three vectors `x_abel, x_bernoulli, x_cauchy` containing the possible values for these three random variables, and three vectors `f.a, f.b, f.c` representing their probability mass function.
+
+```{r 3a}
+
+#<Write code here>
+x_abel <- 1:6
+x_bernoulli <- 0:6
+x_cauchy <- 0:4
+
+f_abel <- rep(1/length(x_abel), length(x_abel))
+
+f_bernoulli <- dbinom(x_bernoulli, p = .5, size = 6)
+
+f_cauchy <- dbinom(x_cauchy,p =.75, size = 4 )
+```
+
+### Part b
+
+Plot each of the three probability distributions. Can you name any of these distributions?
+
+```{r 3b}
+
+#<Write code here>
+
+plot_abel <- as_tibble_col(f_abel) %>% 
+mutate(trial = 1:6) %>% 
+  ggplot()+
+  geom_col(aes(x= trial, y= value), position = "identity")+
+labs(title = "Abel's House Candy Distribution PDF")
+
+plot_abel
+
+
+
+plot_bernoulli <- as_tibble_col(f_bernoulli) %>% 
+  mutate(trial = 1:6) %>% 
+  ggplot()+
+ geom_col(aes(x= trial, y= value), position = "identity")+
+labs(title = "Bernoulli's House Candy Distribution PDF")
+
+plot_bernoulli
+
+
+plot_cauchy <- as_tibble_col(f_cauchy) %>% 
+     mutate(trial = 1:5) %>% 
+  ggplot()+
+ geom_col(aes(x= trial, y= value), position = "identity")+
+labs(title = "Cauchy's House Candy Distribution PDF")
+
+plot_cauchy
+
+
+```
+
+The first plot shows a uniform normal distribution, and the second two are binomial distributions.
+
+### Part c
+
+Calculate the number of candies that can be expected to be obtained from each of the statisticians ($E(X_{k})$) and their variances ($Var(X_{k})$). You can calculate these using the vectors above, or by hand. From which statistician can a child expect the most candies on average? Which statistician will provide the most consistent (i.e. smallest variance) number of candies?
+
+```{r 3c}
+
+#<Write code here>
+
+
+x_abel_mean <- sum(x_abel*f_abel)
+
+x_abel_var <- sum((x_abel-x_abel_mean)^2 * f_abel)
+
+x_bernoulli_mean <- sum(x_bernoulli*f_bernoulli)
+
+x_bernoulli_var <- sum((x_bernoulli - x_bernoulli_mean)^2 * f_bernoulli)
+
+x_cauchy_mean <- sum(x_cauchy*f_cauchy)
+
+x_cauchy_var <- sum((x_cauchy - x_cauchy_mean)^2 * f_cauchy)
+
+c(x_abel_mean, x_bernoulli_mean, x_cauchy_mean)
+c(x_abel_var, x_bernoulli_var, x_cauchy_var)
+```
+
+Abel's house hands out the largest number of candies on average, but Cauchy's house is more consistent.
+
+### Part d
+
+Let $Y=X_{a}+X_{b}+X_{c}$ represent the total haul of candies per child\_ Simulate this process some large number of times (e.g. 10,000) and illustrate the distribution of $Y$. Confirm that the mean and variance are close to the ones that you predicted above.
+
+```{r 3d}
+
+#<Write code here>
+
+abel_sim <- sample(1:6, 10000, TRUE)
+bernoulli_sim <- rbinom(10000,size = 6, p = .5 )
+cauchy_sim <- rbinom(10000, size = 4, p=.75)
+
+trial_sum <- abel_sim+bernoulli_sim+cauchy_sim
+mean(trial_sum)
+var(trial_sum)
+
+```
+
+### Part e
+
+Assuming 100 children visit all three homes, use your simulation results to approximate how many children do you expect to get fewer than 5 candies? More than 12 candies? Is this distribution symmetric?
+
+```{r 3e}
+
+#<Write code here>
+
+plot_sim <- as_tibble_col(trial_sum) %>% 
+     mutate(trial = 1:10000) %>% 
+  ggplot()+
+ geom_bar(aes(x= value), position = "identity")+
+labs(title = " Candy Distribution PDF")
+plot_sim
+
+sum(trial_sum < 5)/length(trial_sum) * 100
+
+sum(trial_sum > 12)/length(trial_sum) * 100
+
+```
+
+The distribution is symmetric. It would be unlikely (\<1% chance) for a child to get fewer than 5 candies. There is a much higher chance (\~10%) that they would get 12 or more candies.
+
+## Problem #4 - Global Earthquakes I
+
+There is excellent access to data on global earthquake activity here: \[http://earthquake.usgs.gov/earthquakes/feed/v1.0/csv.php\] from which you can download the last 30 days worth of earthquakes over 2.5 magnitude. In this problem you will use the data downloaded on 10/29/2015 (earthquakes_20151029.csv) and analyze the times and waiting times of earthquakes globally.
+
+Note that the key columns are "time." Reading and using `Date` objects is important and can be tricky. For more information, see the help files on `as.POSIXlt` and `strptime.` For now, follow the example code below to extract wait times.
+
+```{r 4, echo = TRUE}
+
+earthquakes <- read_csv(here::here("Q1", "week_5", "earthquakes_20151029.csv"))
+
+# Convert the date column to a "date" object in R
+DateTime <- as.POSIXlt(earthquakes$time, format = "%Y-%m-%dT%H:%M:%S")
+
+# Convert the dates to minutes from the smallest time
+Minute <- as.numeric(DateTime - min(DateTime)) / 60
+
+W <- diff(sort(Minute))
+
+```
+
+### Part a
+
+Run the above code to obtain the `Minute` vector and `W` vector of wait times.
+
+### Part b
+
+What is the (sample) mean and standard deviation of `W`, the interval between consecutive earthquakes?
+
+```{r 4b}
+
+#<Write code here>
+
+mean(W)
+sd(W)
+
+```
+
+### Part c
+
+Plot a histogram of `W`.
+
+```{r 4c}
+
+#<Write code here>
+plot_earthquakes <- as_tibble_col(W) %>% 
+   #  mutate(trial = 1:10000) %>% 
+  ggplot()+
+geom_histogram(aes(x=value))+
+  labs(title = "Histogram of waitime between earthquakes",
+       x = "Time (Minutes)")
+
+plot_earthquakes
+
+```
+
+### Part d
+
+Propose a continuous distribution that models these waiting times. Name the distribution and a guess for the value of the key parameter(s). Illustrate this model over a density histogram of waiting times.
+
+```{r 4d}
+
+#<Write code here>
+
+plot_earthquakes_data <- as_tibble_col(W) %>% 
+    mutate(trial = 1:(nrow(earthquakes)-1)) 
+ 
+plot_earthquakes_curve <- ggplot()+
+geom_histogram(data = plot_earthquakes_data, aes(x=value))+
+  geom_curve(aes(x=median(plot_earthquakes_data$value), 
+                 y =160 ,
+                 xend= (max(plot_earthquakes_data$value)+1), 
+                 yend = 0))+
+  labs(title = "Histogram of waitime between earthquakes",
+       x = "Time (Minutes)")
+
+plot_earthquakes_curve
+
+```
+
+I believe that an exponential model is the best fit for this data. The rate of occurrence should be the inverse of the waiting time. I had a hard time getting the plotting to work, so I ended up hardcoding a value in.
+
+### Part e
+
+What are the assumptions behind your model? Do you think they are appropriate for these data?
+
+I am assuming that the data is independent and that there is an equal likelihood of earthquakes occurring anywhere in the world. This is not an acceptable assumption, as we know that earthquakes are far more likely to happen where two tectonic plates meet.
+
+### Part f
+
+Obtain $N_{hour}$, the number of earthquakes that have occurred in each hour.
+
+```{r 4f}
+
+#<Write code here>
+
+earthquake_hour <- earthquakes %>% 
+  mutate( hour = lubridate::hour(time)) %>% 
+  group_by(hour) %>% 
+  summarise(hour_count = n())
+
+hour_plot <- earthquake_hour %>% 
+  ggplot()+
+  geom_col(aes(x=hour, y= hour_count))
+
+hour_plot
+
+```
+
+### Part g
+
+How do you predict this quantity is distributed? Name the distribution, and a guess for the value(s) of the key parameter(s)?
+
+I think it's likely a uniform normal distribution. This is kind of a weird question though because the data sample involves more than one day, so it's not really a great look at a single day of data. Looking at the plot, it doesn't look uniformly distributed, but I don't think time of day should have a relationship with earthquake counts. I think my chart is being influenced by there being more than one day of data present in the sample.
+
+### Part h
+
+Illustrate the empirical distribution and theoretical prediction for $N_{hour}$.
+
+```{r 4h}
+
+#<Write code here>
+
+```
+
+I really don't understand what is being asked for here.
+
+## Problem #5 - The Gamma Distribution
+
+We learned previously that the sum of two uniform random variables is a triangle distribution. Consider the sum of two independent exponential random variables: $Y=X_{1}+X_{2}$, where $X_{1}$ and $X_{2}$ $\sim Gamma(k=2, \lambda)$. The distribution of $Y$ is called the $gamma distribution$. Specifically, $Y \sim Gamma(k=2, \lambda)$, where $k$ is the shape parameter, representing how many independent exponential r.v.'s were summed and $\lambda$ is the $scale parameter$ equal to the mean of the exponential r.v.'s. The probability distribution function (p.d.f.) for the $Gamma(k=2, \theta)$ distribution is:
+
+$$f(y|2, \lambda) = \frac{y}{\lambda^{2}}e^{-\frac{y}{\lambda}};$$
+
+for $y\ge 0$.
+
+### Part a
+
+Write a function for the $Gamma(k=2, \lambda)$ distribution called `Gamma2PDF(x, lambda)` and confirm that it is a valid pdf by integrating it from 0 to $\infty$.
+
+```{r 5a}
+
+#<Write code here>
+
+Gamma2PDF <- function(x, lambda){
+  x / lambda^2 * exp(-x / lambda)
+}
+integrate(Gamma2PDF, 0, Inf, lambda = 1)
+
+```
+
+### Part b
+
+Illustrate the pdf for $\lambda=1$ and $\lambda=2$, calculate the means and variances of these two distributions and illustrate them with vertical lines at the $mean \pm 1 \sigma$.
+
+```{r 5b}
+
+#<Write code here>
+
+set.seed(1)
+x<- rgamma(n = 10000, shape = 2, rate = 1)
+
+mean(x)
+var(x)
+
+set.seed(1)
+y <- rgamma(n = 10000, shape = 2, rate = 2)
+
+mean(y)
+var(y)
+```
+
+### Part c
+
+Simulate two random vectors $X_{1}, X_{2} \sim Exp(2)$. Plot the histogram of the paired sum of these vectors, and confirm that the resulting distribution is Gamma(2, 2) by drawing a curve over the histogram.
+
+```{r 5c}
+
+#<Write code here>
+Y <- rexp(10000, rate = 1 / 2) + rexp(10000, rate = 1 / 2)
+hist(Y, col = "grey", bor = "darkgrey", freq = FALSE, ylim = c(0,0.2),
+     breaks = 50)
+curve(Gamma2PDF(x, lambda = 2), lwd = 2, col = 2, add = TRUE)
+
+```
+
+## Problem #6 - Bonus Problem
+
+### Part a
+
+Based on the definition of the Gamma distribution and the results from the problem above, propose a model for the expected waiting time for two earthquake events on the globe.
+
+### Part b
+
+Obtain from the global earthquake data set a vector $W_{2}$ representing the time between two consecutive events. Plot a histogram of these results and draw the curve of your Gamma distribution model over it using your function. Confirm that it gives the same curve as `R`'s built-in Gamma distribution function (predictably: `dgamma()`).
+
+```{r 6b}
+
+#<Write code here>
+
+```

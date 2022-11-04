@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Melissa Gaughan">
+<meta name="dcterms.date" content="2022-10-27">
+
+<title>UW STATR 501A - Homework #4</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="HW04_Gaughan_Melissa_files/libs/clipboard/clipboard.min.js"></script>
+<script src="HW04_Gaughan_Melissa_files/libs/quarto-html/quarto.js"></script>
+<script src="HW04_Gaughan_Melissa_files/libs/quarto-html/popper.min.js"></script>
+<script src="HW04_Gaughan_Melissa_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="HW04_Gaughan_Melissa_files/libs/quarto-html/anchor.min.js"></script>
+<link href="HW04_Gaughan_Melissa_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="HW04_Gaughan_Melissa_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="HW04_Gaughan_Melissa_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="HW04_Gaughan_Melissa_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="HW04_Gaughan_Melissa_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">UW STATR 501A - Homework #4</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Melissa Gaughan </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 27, 2022</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+</header>
+
+<section id="instructions" class="level1">
+<h1>Instructions</h1>
+<p>Please submit a single zipped folder with all associated files [text report (.pdf, .docx, .txt), R code (.R, .Rmd), data files (.csv, .xlsx, .txt)]. Upload the completed homework assignment into the Canvas drop-box.</p>
+<p>Probability problems may be unintuitive - hence the emphasis on simulation. Please discuss the problems amongst yourselves on the forum, but make sure to submit your own work (code and text).</p>
+<section id="problem-1---reading" class="level2">
+<h2 class="anchored" data-anchor-id="problem-1---reading">Problem #1 - Reading</h2>
+<section id="part-a" class="level3">
+<h3 class="anchored" data-anchor-id="part-a">Part a</h3>
+<p>Read the file lab4_corrected.html (under modules of the course site)</p>
+</section>
+<section id="part-b" class="level3">
+<h3 class="anchored" data-anchor-id="part-b">Part b</h3>
+<p>Read Ch. 1 Probability Models and Ch. 2 Random Variables and Distributions in Probability and Statistics.</p>
+</section>
+<section id="part-c" class="level3">
+<h3 class="anchored" data-anchor-id="part-c">Part c</h3>
+<p>Read Ch. 8 Probability Distributions in An Introduction to R.</p>
+</section>
+</section>
+<section id="problem-2---random-variables-i" class="level2">
+<h2 class="anchored" data-anchor-id="problem-2---random-variables-i">Problem #2 - Random Variables I</h2>
+<section id="part-a-1" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-1">Part a</h3>
+<p>Simulate 1000 numbers from the <a href="https://en.wikipedia.org/wiki/Continuous_uniform_distribution">standard uniform distribution</a> <span class="math inline">\(X \sim Unif(0,1)\)</span>, and report the <a href="https://en.wikipedia.org/wiki/Standard_deviation#Sample_standard_deviation">sample standard deviation</a> (<span class="math inline">\(s_{x}\)</span>) of these numbers.</p>
+<div class="cell">
+
+</div>
+</section>
+<section id="part-b-1" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-1">Part b</h3>
+<p>Write a function that returns <span class="math inline">\(s_{x}\)</span> of <span class="math inline">\(n\)</span> draws from a <span class="math inline">\(Unif(0,b)\)</span> distribution, where <span class="math inline">\(b\)</span> is the upper limit</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 158.5021</code></pre>
+</div>
+</div>
+</section>
+<section id="part-c-1" class="level3">
+<h3 class="anchored" data-anchor-id="part-c-1">Part c</h3>
+<p>Obtain the values <span class="math inline">\(s_{x}\)</span> against values of <span class="math inline">\(b\)</span> ranging from 1 to 10 (using any large value of <span class="math inline">\(n\)</span> of your choosing). Is there a consistent pattern? Can you propose a model that predicts <span class="math inline">\(s_{x}\)</span> with upper limit <span class="math inline">\(b\)</span>?</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 0.2890430 0.5758418 0.8629290 1.1526412 1.4431247 1.7311781 2.0285057
+ [8] 2.3180415 2.5957688 2.8930982</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.2867987</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.2870872</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.2897122</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.2904836</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.456</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.88</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.168</code></pre>
+</div>
+</div>
+<p>The results sample standard deviation seems to increase by approximately 0.288 as the upper limit increases by 1. I would propose that the standard deviation could be predicted by multiplying the upper limit by 0.288.</p>
+</section>
+</section>
+<section id="problem-3---random-variables-ii" class="level2">
+<h2 class="anchored" data-anchor-id="problem-3---random-variables-ii">Problem #3 - Random Variables II</h2>
+<section id="part-a-2" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-2">Part a</h3>
+<p>Generate two vectors <span class="math inline">\(X_{1}\)</span> and <span class="math inline">\(X_{2}\)</span>, each of which represents 10,000 draws from the <span class="math inline">\(Unif(0,1)\)</span> distribution. Obtain the pairwise sum of these vectors (<span class="math inline">\(Y_{2} = X_{1} + X_{2}\)</span>) and plot the density histogram of <span class="math inline">\(Y\)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="HW04_Gaughan_Melissa_files/figure-html/3a-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="part-b-2" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-2">Part b</h3>
+<p>Guess what the probability distribution function (p.d.f.) of <span class="math inline">\(Y_{2}\)</span> might be (i.e.&nbsp;describe it mathematically with a pairwise function), and illustrate it with a line over the histogram.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="HW04_Gaughan_Melissa_files/figure-html/3b-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="part-c-2" class="level3">
+<h3 class="anchored" data-anchor-id="part-c-2">Part c</h3>
+<p>Similarly, obtain <span class="math inline">\(Y_{5} = X_{1} + X_{2} + ... + X_{5}\)</span> and <span class="math inline">\(Y_{10}\)</span>. Plot on a single 4x2 figure the respective histograms and qqnorm plots of <span class="math inline">\(X_{1}, Y_{2}, Y_{5}, Y_{10}\)</span>. What do you observe?</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="HW04_Gaughan_Melissa_files/figure-html/3c-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="HW04_Gaughan_Melissa_files/figure-html/3c-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="HW04_Gaughan_Melissa_files/figure-html/3c-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="HW04_Gaughan_Melissa_files/figure-html/3c-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As more observations are taken from the normal distribution, the data becomes more normal (the QQ plot approaches a diagonal line with a positive slope). This is an example of the Central Limit Theorem.</p>
+</section>
+</section>
+<section id="problem-4---de-mérés-wager-i" class="level2">
+<h2 class="anchored" data-anchor-id="problem-4---de-mérés-wager-i">Problem #4 - De Méré’s Wager I</h2>
+<p><a href="https://en.wikipedia.org/wiki/Antoine_Gombaud">Antoine Gombaud</a>, a.k.a. the Chevalier de Méré (1607-1684) was a “gentleman gambler” (and amateur mathematician) in France. One game de Méré enjoyed playing (though it sounds awfully boring to me) would be to bet with even odds (i.e.&nbsp;lose a franc if you lose, win a franc if you win) on getting at least one six on four rolls of a fair die. He reasoned that the chance of getting a six in one roll of a die is <span class="math inline">\(1/6\)</span>, so the chance of getting one six in four would be <span class="math inline">\(4/6=2/3\)</span>.</p>
+<section id="part-a-3" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-3">Part a</h3>
+<p>Write a function <code>DeMereA(n)</code> that simulates this game, i.e.&nbsp;takes a certain number <span class="math inline">\((n)\)</span> of rolls of a die and returns a <code>TRUE</code> if there is at least one six and a <code>FALSE</code> if there isn’t.</p>
+<div class="cell">
+
+</div>
+</section>
+<section id="part-b-3" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-3">Part b</h3>
+<p>Simulate 1000 of these games and compute the number of times he wins.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 151</code></pre>
+</div>
+</div>
+</section>
+<section id="part-c-3" class="level3">
+<h3 class="anchored" data-anchor-id="part-c-3">Part c</h3>
+<p>De Méré’s reasoning was faulty, but he still won a lot of money playing this (frankly, kind of stupid) game. What is the actual probability of getting at least one six in four rolls? (Use math or simulate in R)</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5177469</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="problem-5---de-mérés-wager-ii" class="level2">
+<h2 class="anchored" data-anchor-id="problem-5---de-mérés-wager-ii">Problem #5 - De Méré’s Wager II</h2>
+<p>Despite the faulty reasoning, de Méré actually won a lot of money playing this game but became bored of it. So, to make things mildly more interesting, he devised a second game. In this one, he would wager - again with even odds - on getting at least one double six on 24 rolls of a pair of dice. He reasoned correctly that the chance of getting a double six in rolling a pair of dice is <span class="math inline">\(1/36\)</span>. So he assumed that in 24 rolls of a pair of dice, the chance of getting one double six would be <span class="math inline">\(24/36=2/3\)</span>.</p>
+<section id="part-a-4" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-4">Part a</h3>
+<p>Write an analogous function <code>DeMereB(n)</code> that simulates the 24 roll game with double dice.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section>
+<section id="part-b-4" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-4">Part b</h3>
+<p>Simulate 1000 of these games and compute the number of victories.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 654</code></pre>
+</div>
+</div>
+</section>
+<section id="part-c-4" class="level3">
+<h3 class="anchored" data-anchor-id="part-c-4">Part c</h3>
+<p>Again, de Méré’s reasoning was faulty. Compute the actual probability of getting at least one double six in twenty four rolls. (Use math or simulate in R)</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4914039</code></pre>
+</div>
+</div>
+<p>Based on more empirical data (i.e.&nbsp;losing a lot of money), he knew something was not quite right in the second game of dice. So he challenged his famous friend <a href="https://en.wikipedia.org/wiki/Blaise_Pascal">Blaise Pascal</a> to help him find an explanation. In a series of letters between Pascal and <a href="https://en.wikipedia.org/wiki/Pierre_de_Fermat">Pierre de Fermat</a>, not only did de Méré learn not to make naive calculations, but the foundation was laid for the theory of probability.</p>
+</section>
+</section>
+<section id="problem-6---card-playing" class="level2">
+<h2 class="anchored" data-anchor-id="problem-6---card-playing">Problem #6 - Card Playing</h2>
+<p>A standard playing deck of 52 cards consists of 13 unique valued cards (2 to 10, and four face cards: the Ace, Jack, Queen, and King) each in 4 different suits (hearts, diamonds, clubs, and spades). You can generate a complete deck of cards in R using something like the following code, although I recommend you simplify this deck to just what’s necessary to simulate each question.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>CardNames <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>, <span class="st">"Jack"</span>, <span class="st">"Queen"</span>, <span class="st">"King"</span>, <span class="st">"Ace"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>Deck <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste</span>(CardNames, <span class="st">"of Diamonds"</span>),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">paste</span>(CardNames, <span class="st">"of Hearts"</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>          <span class="fu">paste</span>(CardNames, <span class="st">"of Clubs"</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">paste</span>(CardNames, <span class="st">"of Spades"</span>))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(CardNames)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="fu">head</span>(Deck), <span class="fu">tail</span>(Deck)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "2 of Diamonds"   "3 of Diamonds"   "4 of Diamonds"   "5 of Diamonds"  
+ [5] "6 of Diamonds"   "7 of Diamonds"   "9 of Spades"     "10 of Spades"   
+ [9] "Jack of Spades"  "Queen of Spades" "King of Spades"  "Ace of Spades"  </code></pre>
+</div>
+</div>
+<p>And then we can “draw” five cards simply with: <code>sample(Deck, 5, replace = TRUE)</code>.</p>
+<section id="part-a-5" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-5">Part a</h3>
+<p>How many possible hands of five unique cards can be drawn from a deck of cards? (Note: cards are drawn without replacement)</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2598960</code></pre>
+</div>
+</div>
+</section>
+<section id="part-b-5" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-5">Part b</h3>
+<p>In poker, a flush is defined as five cards of the same suit, regardless of the value of the card. Write a function called <code>IsFlush()</code> that draws five cards from a deck, determines whether or not it is a flush, and returns the appropriate logical value.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+</section>
+<section id="part-c-5" class="level3">
+<h3 class="anchored" data-anchor-id="part-c-5">Part c</h3>
+<p>Simulate this process 10,000 times and count how many times you draw a flush. What is the approximate probability of a flush based on this experiment? (Note: this can be approached with a loop or <code>apply()</code> on a matrix of decks)</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 29</code></pre>
+</div>
+</div>
+<p>Based on this experiment, the chance of drawing a flush is 0.0022%. My function showed a total of 22 flushes in 10,000 simulations.</p>
+</section>
+<section id="part-d" class="level3">
+<h3 class="anchored" data-anchor-id="part-d">Part d</h3>
+<p>A straight is a sequence of five cards in numerical order (note: for simplicity we define Ace = 13 only. So Ace-2-3-4-5 is not considered a straight). Repeate exercises (b) and (c) for the straight (i.e.&nbsp;create a function <code>IsStraight()</code> and repeat the experiment 10,000 times)</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 294</code></pre>
+</div>
+</div>
+</section>
+<section id="part-e" class="level3">
+<h3 class="anchored" data-anchor-id="part-e">Part e</h3>
+<p>Based on these results, which is the more likely hand to be dealt in a game of poker?</p>
+<p>My function returned 252 straights in 10,000 draws (an approximate probability of 0.0252%). It’s much more likely that you will get a straight than a flush.</p>
+</section>
+</section>
+<section id="problem-7---airplane-functioning" class="level2">
+<h2 class="anchored" data-anchor-id="problem-7---airplane-functioning">Problem #7 - Airplane Functioning</h2>
+<p>You are planning on taking a flight on Epsilon Airlines across the Pacific Ocean. To have a successful flight, 100 different components on the plane must ALL function correctly. Each of these components has a probability 0.001 of failing.</p>
+<section id="part-a-6" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-6">Part a</h3>
+<p>Use the <code>rbinom()</code> function to simulate a flight on Epsilon airline by creating a vector of 100 elements which succeed or fail with the appropriate probability.</p>
+<div class="cell">
+
+</div>
+</section>
+<section id="part-b-6" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-6">Part b</h3>
+<p>Use the <code>rbinom()</code> function in a slightly different way to produce a vector of length 1,000,000 in which each element is the number of components that fail in each flight. Use this vector to produce an estimate of the probability of failure for the plane.</p>
+<div class="cell">
+
+</div>
+</section>
+<section id="part-c-6" class="level3">
+<h3 class="anchored" data-anchor-id="part-c-6">Part c</h3>
+<p>Based on this result, would you take a flight on Epsilon airlines? Why or why not?</p>
+<p>No, definitely not. The probability of something going wrong with the plane is 0.095226. That’s well above my level of risk tolerance.</p>
+</section>
+<section id="part-d-1" class="level3">
+<h3 class="anchored" data-anchor-id="part-d-1">Part d</h3>
+<p>Using <code>dnorm()</code>, calculate the exact probability that the flight will not be successful. What important assumption are you making in this calculation (and the previous simulations)?</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.09520785</code></pre>
+</div>
+</div>
+<p>The major assumption that we have made in this problem is that the failure of one part will not cause the failure of other parts. We are assuming that all parts in this airplane are independent of each other.</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
