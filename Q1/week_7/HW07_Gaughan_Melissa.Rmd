@@ -1,0 +1,210 @@
+---
+title: "UW STATR 501A - Homework #7"
+author: "<Insert Student Name>"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+# Instructions
+
+Please submit a single zipped folder with all associated files [text report (.pdf, .docx, .txt), R code (.R, .Rmd), data files (.csv, .xlsx, .txt)]. Upload the completed homework assignment into the Canvas drop-box.
+
+***Note: Carefully reviewing the Lab will help with much of the problems.
+
+## Problem #1 - Reading
+
+### Part a
+
+Read the file lab7.html (under modules of the course site) 
+
+### Part b
+
+Read Ch. 6 (up to 6.3) in Probability and Statistics.
+
+## Set-Up
+
+The inference theory that we presented in class relies on the assumption that the distribution of the sample mean $\overline{X}$ is approximately normal. We will test this assumption by working with the earthquake waiting data, which we know are highly non-normal.
+
+Assume that the true standard deviation of earthquake waiting times is $\sigma=35$ min, and the true mean is $\mu=35$ min.
+
+## Problem #2 - Point Estimates & Confidence Intervals
+
+### Part a
+
+Do Exercise 2 from the lab (i.e. Write a function that estimates a point estimate and confidence interval at a given confidence level from a vector $X$ with known standard deviation)
+
+```{r 2a}
+
+#<Write code here>
+
+confidence_interval <- function(x, sigma, confidence_level ){
+  obs <- length(x)
+  mean_x <- mean(x)
+  p <- (1-confidence_level)/2
+  ci_width <- sigma/sqrt(obs) *qnorm(p, lower.tail = F)
+  ci <- mean_x + c(-1, 1) *ci_width
+  list(estimate = mean_x, confidence_interval = ci)
+  
+}
+
+```
+
+### Part b
+
+Use this function to obtain a point estimate and 95% and 50% confidence intervals of three random samples from $W$ of size 3, 10, and 30 respectively (i.e. `W_5 <- sample(W, 5)`, `W_10 <- sample(W, 10)`, and `W_30 <- sample(W, 30)`).
+
+```{r 2b}
+
+#<Write code here>
+library(here)
+library(tidyverse)
+earthquakes <- read_csv(here::here("Q1", "week_5", "earthquakes_20151029.csv" )) 
+
+waiting_times <- earthquakes %>% 
+  arrange(time) %>% 
+  mutate(last_earthquake_time = lag(time)) %>% 
+  mutate(waiting_time = difftime( time, last_earthquake_time, units = "mins")) %>% 
+  drop_na(waiting_time)
+
+waiting_times_vector <- as.vector(waiting_times$waiting_time)
+
+sigma <- 35
+
+samples <- c(3, 10, 30)
+
+confidence_levels <- c(0.5, 0.95)
+
+input_parameters <- expand.grid(samples = samples, confidence_levels = confidence_levels)
+
+
+
+
+sample <- sample(waiting_times_vector, 3)
+
+
+
+test <- mapply( function(sample_size, confidence_level){
+  sample <- sample(waiting_times_vector, size = sample_size)
+  out <-  confidence_interval(x= sample, sigma = 35, confidence_level = confidence_level)
+    write("--------------------", stdout())
+  write(paste0(sample_size, " samples at ", 100 * confidence_level, "% confidence level"),
+        stdout())
+  write(paste0("Estimate: ", out$estimate), stdout())
+  write(paste0("Confidence interval: (", out$confidence_interval[1], ", ", out$confidence_interval[2], ")"),
+        stdout())
+  out
+  
+  
+}, 
+sample_size = input_parameters$samples, confidence_level = input_parameters$confidence_levels, 
+SIMPLIFY = FALSE)
+
+  
+
+
+
+```
+
+### Part c
+
+Test the validity of your confidence level by repeating this procedure 10,000 times and count the proportion of times the 95% and 50% confidence intervals span the true mean. Comment on these results with respect to the assumptions behind our construction of the confidence interval.
+
+```{r 2c}
+
+#<Write code here>
+
+## Write a function to get the confidence interval, then test whether it covers
+## the true mean. Using a default sample size of 30.
+inout_ci <- function(conf_level, mu, sigma, x, n = 30) {
+ # sigma = 35
+ # mu = 35
+  w <- sample(waiting_times_vector, 30)
+  ci <- confidence_interval(x=w, sigma, confidence_level = .5)
+  ## Return TRUE if true mean falls within confidence interval
+  min(ci$confidence_interval, na.rm = T) < mu && mu < max(ci$confidence_interval, na.rm = T)
+}
+## Now that the above function is defined, it is easy to use `replicate` to get
+## 10,000 samples and summarize them.
+ci50 <- replicate(10000, inout_ci(0.5, mu = 35, sigma = 35, x = waiting_times_vector))
+ci95 <- replicate(10000, inout_ci(0.95, mu = 35, sigma = 35, x = waiting_times_vector))
+
+
+```
+
+## Problem #3 - Hypothesis Tests
+
+In a previous homework, we tested the hypothesis that the seismic activity of the world is increasing in anticipation of the apocalypse. We based this on an observation that the mean waiting time between 10 consecutive earthquakes was about 23.4 minutes, compared to a known mean and standard deviation of 35 and 35 minutes respectively. Here, we decompose this hypothesis test into its constituent parts.
+
+### Part a
+
+State the null and alternative hypotheses, in words and symbolically.
+
+### Part b
+
+Last week, we tested the sample mean $\overline{X}$ directly. This time, we would like to perform the test on the $z_{test}$ statistic:
+
+$$z_{test}=\frac{\overline{X}-\mu_{0}}{\frac{\sigma}{\sqrt{n}}}$$
+
+Compute this statistic.
+
+```{r 3b}
+
+#<Write code here>
+
+```
+
+### Part c
+
+Name the approximate distribution of this statistic under the null hypothesis.
+
+### Part d
+
+Express the p-value of this test symbolically, and compute it. At a $\alpha=5\%$ significance level, do you reject the null hypothesis?
+
+```{r 3d}
+
+#<Write code here>
+
+```
+
+## Problem #4 - Final Project
+
+Start working on your project. Generally, begin by exploring your data. Use the `str()`, `summary()`, and `hist()` functions. Maybe try summarizing data by categories of a categorical variable (using a combination of `tapply()` or `aggregate()` and `summary()`, for example). Look for data errors (unusual values, unexpected 0s, missing values, etc.). If your data requires you to do any data manipulation to get the variables in the final form you will use for analysis, do this. Plot the distribution of your outcome variable using a histogram and a qqplot. If your explanatory variable is continuous, create a scatterplot with the explanatory variable on the x-axis and outcome variable on the y-axis. If your explanatory variable is categorical, create a boxplot with the explanatory variable on the x-axis and the outcome variable on the y-axis. Present one or two of these plots/summaries here.
+
+```{r 4}
+
+#<Write code here>
+
+```
+
+## Problem 5 - Bonus
+
+### Part a
+
+You can generate a sample of size 10 with mean 15 from an exponential distribution using `W_obs <- rexp(10, rate = 1 / 15)`. Perform a t-test of `W_obs` for the null hypothesis that the mean is 35 and report the results
+
+```{r 5a}
+
+#<Write code here>
+
+```
+
+### Part b
+
+Perform a t.test of the following observed data against the $\mu_{0}=35$ minutes.
+
+`W_obs <- c(0.9, 4.2, 0.1, 1.8, 0.9, 7.3, 0.4, 6.5, 1.8, 123)`
+
+```{r 5b}
+
+#<Write code here>
+
+```

@@ -1,0 +1,282 @@
+---
+output: html_document
+---
+# StatR 501: Lab 7
+## Eli Gurarie
+
+
+
+
+## Preamble: MarkDown R documents
+
+This lab was written in [Markdown](http://en.wikipedia.com/wiki/Markdown), a lightweight and easy to use html mark-up language. There is a nifty new R package called `knitr`, which allows for a smooth integration of text, R code, R graphics, and hyperlinks into single simple documents.  **Rstudio**, in particular, has some nice integrated tools for working with `knitr` and Markdown. 
+
+First, you need to install and load the `knitr` package in R:
+
+    install.packages("knitr")
+    library(knitr)
+    
+Essentially, you create a text-file with an `.Rmd` extension, for example: `MyFile.Rmd`.  In it, you include all your text, including sections of R code, and then you run the line:
+
+     knit('MyFile.Rmd')
+     
+in R to compile it.  "Compile" here means it converts your `.Rmd` file into an `html` file called `MyFile.html`, running all the embedded R code and producing plots.  
+
+Within Rstudio, you can go to  **> File > New > R Markdown**, and you will have access to some handy buttons which automatically save, compile and display, as well as color your syntax. 
+
+In order to include R code, I use the triple opening single quote marks, with the additional `{r}` command. Thus this: 
+
+<pre>```{r}
+  runif(10)
+```</pre>
+
+Produces this, with output included:
+```{r}
+  runif(10)
+```
+
+If you do not want to show the *input* but want to show the *output*, then this:
+
+<pre>```{r, echo=FALSE}
+  runif(10)
+```</pre>
+
+Produces this:
+
+```{r, echo=FALSE}
+  runif(10)
+```
+
+And you want to show the *code* but don't want to show the results:
+
+<pre>```{r, results='hide'}
+  runif(10)
+```</pre>
+
+Produces this:
+
+```{r, results='hide'}
+  runif(10)
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=5, fig.height=5}
+theta <-  seq(0,10*pi, length = 1000)
+plot(complex(arg = theta, mod = cos(theta/4) +sin(5*theta)), type="l")
+```
+
+
+### 1. Inference 
+#### 1.1. Point Estimate of Bernoulli Trial
+
+> Note: I lifted the following examples directly from [The Cartoon Guide To Statistics](http://www.amazon.com/Cartoon-Guide-Statistics-Larry-Gonick/dp/0062731025), which is a great book for grasping some basic (but slippery) statistical concepts.*
+
+Suppose the Bernoulli Tack Factory is churning out brass tacks, some of which (inevitably) are defective.  You want to guess the true proportion *p* of defective tacks is.  So you sample *n=1000* tacks, and, say, *x = 832* are good ones.  Obviously, our best guess for the probability is $\widehat{p} = x/n = 832/1000 = 0.832$.  
+
+Now we ask: "How good is this estimate?" This is answered with a point estimate and a confidence interval (at a certain confidence level, e.g. 95%).
+
+The basic way you makea 95% confidence interval here is: (1) find the point estimate (here: $\widehat{p} = 0.832$) and (2) determine the standard deviation of the estimate $\sigma(\widehat{p}) = \sqrt{\frac{p(1-p)}{n}}$, and (3) use the properties of the sampling distribution (usually: assuming normality) identify the range which captures the confidence level.  At large sample sizes we can and assume that this random variable is normally distributed, and therefore 95% of the mass of this distribution is within 2 (or more precisely 1.96 [or even more precisely `qnorm(0.975)`]) standard deviations within the mean.  Thus $\widehat{p} \pm 1.96 \sigma(\widehat{p})$.  
+
+Ok, in R:
+
+```{r}
+x <- 832
+n <- 1000
+p.hat <- x/n
+z.critical <- qnorm(0.975)
+p.hat.sd <- sqrt(p.hat*(1-p.hat)/n)
+p.CI <- p.hat + c(-1,1)*z.critical*p.hat.sd
+p.CI
+```
+
+We can draw this estimate:
+
+```{r, fig.height=3.5}
+curve(dnorm(x, mean=p.hat, sd = p.hat.sd), xlim=c(0,1), col=2, n=1000, xlab="p.hat", ylab="density", bty="l")
+abline(v = p.hat, lty=2)
+abline(v = p.CI, lty=3)
+```
+
+This is a very narrow confidence interval, suggesting it is unlikely that the true probability of a good tack is less than 80%.
+
+> **Exercise 1:** Write a function (called getP) that returns a point estimate and confidence interval for a probability estimate at an arbitrary confidence level.  
+
+```{r CIfunction, echo=FALSE}
+getP <- function(x, n, conf.level=0.95)
+{
+  p.hat <- x/n
+  p.hat.sd <- sqrt(p.hat*(1-p.hat)/n)
+  z.critical <- qnorm(1 - (1-conf.level)/2)
+  
+  p.CI <- p.hat + c(-1,1)*z.critical*p.hat.sd
+  curve(dnorm(x, mean=p.hat, sd = p.hat.sd), xlim=c(0,1), col=2, n=1000, xlab="p.hat", ylab="density", bty="l", main=paste(conf.level*100, "% Confidence Interval", sep=""))
+  abline(v = p.hat, lty=2)
+  abline(v = p.CI, lty=3)
+  return(list(p.hat = p.hat, p.CI = p.CI))
+}
+```
+
+Try it out, assuming we sampled just 100 tacks, and counted 89 good ones.
+
+```{r, fig.height=3.5}
+getP(x = 89, n = 100, conf.level = 0.95)
+```
+
+What about at 99% confidence?
+```{r, fig.height=3.5}
+getP(x = 89, n = 100, conf.level = 0.99)
+```
+
+
+#### 1.2. Hypothesis Test for Bernoulli trial
+
+Lets go back to the brother who suspects that spinning a coin is not `fair', and therefore spins it 100 times and finds 60 tails.  In the lecture, we talked about how setting up the confidence interval.  We can use the code above:
+```{r, fig.height=3.5}
+getP(x = 60, n = 100, conf.level = 0.95)
+```
+A fair coin is just outside the 95% C.I.
+
+This is also a very natural set-up for a hypothesis test of fairness.  Recall the steps:
+1. we specify $H_0: p = 0.5$
+2. we specify $H_a: p > 0.5$
+3. we assess the probability of such an extreme event. 
+
+Under the null-hypothesis, $X \sim \text{Bernoulli}(n=100, p=0.5)$.  So, the probability of getting a 60 or above is:
+$$
+\sum_{i=60}^{100} f(x|n=100,p=0.5)
+$$
+
+In R:
+```{r}
+1 - pbinom(59, size=100, p=0.5)
+```
+or:
+```{r}
+sum(dbinom(60:100, size=100, p=0.5))
+```
+This probability is smaller than the typical significance level of 0.05, so *at that level* we reject $H_0$.
+
+A simple test of proportions can be done in R with the following command:
+
+```{r}
+prop.test(x=60, n=100, p=0.5)
+```
+
+This is the first bit of automatically generated statistical output we have seen in R.  Note that according to this output, the p-value is 0.05743, which is typically not considered significant.  Why is it different?  Because the test was two-sided, i.e. we tested more rigorously *"Is the Coin Fair?"* versus *"Is the Coin Biased Towards Tails?"*  In order to test the second test, we specify the alternative:
+
+```{r}
+prop.test(x=60, n=100, p=0.5, alternative="greater")
+```
+
+This result agrees almost exactly with our own p-value.  The difference is that they use, essentially, the normal approximation.  
+
+```{r}
+1 - pnorm(59.5, mean=50, sd=sqrt(.5*.5*100))
+```
+
+[In fact, R uses a slightly different and more general test statistic called the Chi-squared statistic, but for the case of a single proportion compared to a null proportion, the Chi-squared and normal approximation collapse to the same test.]
+
+
+#### 1.3. Point estimate of mean with known variance
+
+Let's quickly consider the dog problem.  We randomly find 4 dogs of length (knowing, somehow, that the global s.d. for dogs is 20 cm):
+```{r}
+Dog <- c(80,85,60,115)
+```
+
+How to construct a confidence interval?
+
+```{r}
+n <- length(Dog)
+Dog.mean <- mean(Dog)
+Dog.sd <- 20
+Dog.CI <- Dog.mean + qnorm(0.975) * c(-1,1) * Dog.sd/sqrt(n)
+Dog.CI                                                        
+```
+
+> **Exercise 2:** Write a function that takes a sample X with known s.d. and returns its point estimate and confidence interval.
+
+```{r, echo=FALSE}
+GetCI <- function(X, sd, conf.level=0.95)
+{
+  n <- length(X)
+  X.bar <- mean(X)
+  X.CI <- X.bar + qnorm(1-(1-conf.level)/2) * c(-1,1) * sd/sqrt(n)
+  return(list(estimate = X.bar, CI = X.CI))
+}
+```
+
+Example:
+```{r}
+GetCI(Dog, sd=20)
+```
+```{r}
+GetCI(Dog, sd=20, conf.level=0.99)
+```
+
+Recall, that this result says that there is a 95% probability that the true mean lies somewhere within this interval. Let's try to illustrate the way inference fundamentally inverts probability statements. 
+
+Create a vector of the entire dog population, draw a histogram, and illustrate our confidence interval using `segments(x0,y0,x1,y1)`:
+```{r, fig.height=3.5}
+Dogs <- rnorm(100000, mean=100, sd=20)
+hist(Dogs, col="grey", breaks=100, bor="grey")
+abline(v=100, col=2, lwd=2)
+myCI <- GetCI(Dog, sd=20, conf.level=0.95)$CI
+segments(myCI[1], 0, myCI[2], 0, lwd=2)
+```
+
+We are going to sample 4 dogs out of this population many many times, and plot their confidence interval on this histogram
+```{r}
+hist(Dogs, col="grey", breaks=100, bor="grey")
+abline(v=100, col=2, lwd=2)
+c<-0
+for(i in 1:1000)
+{
+  col <- 1
+  myCI <-  GetCI(sample(Dogs,4), sd=20, conf.level=0.95)$CI
+  # count the ones that don't surround the mean
+  if(min(myCI) > 100 | max(myCI) < 100)
+      {c <- c+1; col <- 3}
+  if(i*30 < 4000)
+  segments(myCI[1], i*30, myCI[2], i*30, lwd=2, col=col)
+}
+c/1000
+```
+Notice, how approximately 5% of all the confidence intervals actually DO miss the true mean.  
+
+> **Exercise 3:** Try performing this experiment with a highly non-normal distribution, for example your model of earthquake waiting times. 
+
+#### 1.4. Hypothesis test of sample mean against known population 
+
+We sampled 25 Sri Lankan strays, and here is their data:
+
+```{r}
+Dog.SL <- c(82, 109, 127, 124, 64, 88, 116, 83, 83, 99, 85, 127, 104, 85, 70, 88, 98, 81, 101, 104, 76, 92, 64, 59, 91)
+mean(Dog.SL)
+```
+
+We want to test the hypothesis (at 0.05 significance) that they are smaller than the reference population of global dogs (mean = 100 cm, s.d. = 20 cm).  
+
+1. Specify $H_0: \mu = \mu_0$
+2. Specify $H_a: \mu < \mu_0$
+3. Test statistic: $z_{test} = \frac{\overline{X} - \mu_0}{\sigma/\sqrt{n}}$
+4. Distribution of test statistic under $H_0$: $Z \sim {\cal N}(0,1)$. 
+5. $P$-value: $Pr(z_{test} < Z)$
+
+```{r}
+n <- length(Dog.SL)
+X.bar <- mean(Dog.SL)
+sigma <- 20
+mu.0 <- 100
+z.test <- (X.bar - mu.0)/(sigma/sqrt(n))
+1-pnorm(abs(z.test))
+```
+
+> **Quick exercise 4:** How do we make this a two-sided test?
+
+This is called the "Z-test", and it is so basic it does not have an automatic little function in R.  However, the following one-liner of code performs something very similar:
+```{r}
+ t.test(Dog.SL, mu=100, alternative="less")
+```
+Why "T"?  Why is the *p*-value a little greater?  What does *df* stand for?  These are topics for next week.
